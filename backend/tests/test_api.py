@@ -24,7 +24,8 @@ def post(path, payload=None, expected=200):
 
 def test_catalogue_and_scenarios():
     assert len(client.get("/incident/catalogue").json()["controls"]) == 10
-    assert [s["id"] for s in client.get("/incident/scenarios").json()] == ["C1"]
+    assert [s["id"] for s in client.get("/incident/scenarios").json()] == [
+        "C1", "C2", "C3", "C4", "C5", "C6"]
 
 
 def test_idle_start_and_reset():

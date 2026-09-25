@@ -115,25 +115,32 @@ class IncidentSession:
         effects = [(effect, active.approved_t) for cid, active in self.controls.items()
                    for effect in CONTROLS[cid].effects]
         frame = self.generator.step(t, effects)
-        # Injects are temporary test overlays; never rewrite scenario tracks.
-        active_injects = [(event, start) for event, start in self.injects if t - start < 300]
+        # Live overlays are temporary and never rewrite scenario tracks.
+        durations = {"stablecoin_dip": 300, "oracle_stale": 150,
+                     "api_overload": 180, "rumour": 300}
+        holds = {"stablecoin_dip": 180, "oracle_stale": 90,
+                 "api_overload": 120, "rumour": 240}
+        active_injects = [(event, start) for event, start in self.injects
+                          if t - start < durations[event]]
         self.injects = active_injects
         if active_injects:
             from .contracts import SignalFrame
             values = dict(frame.values)
             flags = dict(frame.flags)
             for event, start in active_injects:
-                strength = max(0.0, 1 - (t - start) / 300)
+                elapsed = t - start
+                strength = 1.0 if elapsed <= holds[event] else max(
+                    0.0, 1 - (elapsed - holds[event]) / (durations[event] - holds[event]))
                 if event == "stablecoin_dip":
                     values["STBL_PX"] = min(values["STBL_PX"], 1 - .018 * strength)
                 elif event == "oracle_stale":
-                    values["ORACLE_AGE"] = max(values["ORACLE_AGE"], 12 * strength)
+                    values["ORACLE_AGE"] = max(values["ORACLE_AGE"], 20 * strength)
                 elif event == "api_overload":
-                    values["API_ERR_PCT"] = max(values["API_ERR_PCT"], 4 * strength)
-                    flags["cannot_close"] = strength > .5
+                    values["ORDER_LATENCY_P95"] = max(values["ORDER_LATENCY_P95"], 2000 * strength)
+                    values["API_ERR_PCT"] = max(values["API_ERR_PCT"], 12 * strength)
                 elif event == "rumour":
-                    values["RUMOR_MENTIONS"] = max(values["RUMOR_MENTIONS"], 50 * strength)
-                    flags["media_attention"] = strength > .5
+                    values["RUMOR_MENTIONS"] = max(values["RUMOR_MENTIONS"], 40 * strength)
+                    flags["media_attention"] = strength > 0
             frame = SignalFrame(t=t, values=values, flags=flags, meta=frame.meta)
         self.frame = frame
         self.history.add(frame)
