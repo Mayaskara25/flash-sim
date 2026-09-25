@@ -36,13 +36,34 @@ Conventions (all per the H1 handoff):
   prices. Positions already past their threshold at build ("underwater at
   the start", entry-spread outliers) are dropped silently. Liquidation is
   sticky: a position liquidates once.
-- Observed liquidations = newly crossed positions × ``book_scale`` ×
-  ``LAR_MULT`` (the ``faults.LAR_MULT`` track; how C3 makes LAR ≫ 1).
-- Expected liquidations come from a precomputed lookup table
-  ``Δp ∈ [0, −20%] step 0.25% → share of open positions liquidated``
-  (SPEC §9.2), evaluated as the trailing-60 s window maximum drawdown
-  (see ``expected_per_min``).
+- Observed liquidations = **executed** positions (see throughput queue
+  below) × ``book_scale`` × ``LAR_MULT`` (the ``faults.LAR_MULT`` track;
+  how C3 makes LAR ≫ 1).
+- Expected liquidations come from the same executed-count time series,
+  without the ``LAR_MULT`` fault (see ``expected_liq_rate``) — "what a
+  correctly-functioning engine would have visibly processed."
 - ``ADL_COUNT`` increments when the fund would go below 0 (fund floors at 0).
+
+Liquidation engine throughput (queue). A real liquidation engine cannot
+execute an unbounded number of positions in a single tick: matching engine
+capacity, exchange rate limits, and order-book depth all bound how many
+liquidations can actually be *filled* per minute. ``book.liq_capacity_per_min``
+(a scenario knob, ``None`` = unbounded, the default so every scenario other
+than C1 keeps the old immediate-execution behaviour) models this: every tick,
+newly-crossed positions are marked liquidated (sticky — they can never
+re-cross) and pushed onto a FIFO queue, but only up to ``capacity_per_min``
+worth are *executed* (removed from the queue, priced, and counted) per
+minute. Backlog persists across ticks and is executed at whatever price
+applies *when it is dequeued*, not when it was queued — so if the price is
+still falling while a backlog drains, later-executed positions realise a
+deeper slip and a bigger shortfall than they would have at enqueue time
+(SCHEMA.md). This is also why a front-loaded price drop across a dense
+leverage cluster no longer shows up as a one-tick liquidation cliff followed
+by a starved, empty book: the burst of *eligible* positions queues up and
+the *observed* (executed) rate is smoothed to the engine's real throughput,
+continuing to drain the backlog (and the fund) for several minutes after the
+price move that created it — the "cascade is still ongoing" period the
+SPEC/PLAN demo narrative needs around T+14..T+18.
 """
 
 from __future__ import annotations
@@ -54,6 +75,7 @@ import numpy as np
 from simulation.market import ASSETS
 from simulation.portfolio import generate_portfolio
 
+from .clock import TICK_S
 from .scenario_loader import ScenarioLoader
 
 #: Incident liquidation buffer (fraction of initial margin consumed before
@@ -110,6 +132,9 @@ class CrashBook:
         self.start_fund = float(spec.book.insurance_fund_usd)
         self.fund_usd = float(spec.book.insurance_fund_usd)
         self.adl_count = 0
+        cap = spec.book.liq_capacity_per_min
+        self.capacity_per_min: float | None = float(cap) if cap else None
+        self._dequeue_budget = 0.0
 
         start_prices = {s: m["start"] for s, m in ASSETS.items()}
         pf = generate_portfolio(
@@ -136,11 +161,23 @@ class CrashBook:
         # events, no fund impact. Otherwise they all "liquidate" in tick 1
         # while L_exp ≈ 0 and LAR spikes to absurd values.
         self._mark_cold_start()
-        # Event log: (t, scaled_count, scaled_shortfall, scaled_neg_count).
+        # Event log: (t, scaled_observed, scaled_shortfall, scaled_neg,
+        # scaled_unfaulted). "observed" includes LAR_MULT; "unfaulted" is
+        # the same executed count without it — the LAR denominator
+        # (`expected_liq_rate`) sums that column, so LAR reduces exactly to
+        # `lar_mult` whenever anything executes: a throughput-bound but
+        # otherwise fault-free engine is by definition "market-explained".
         # neg counts only liquidations whose shortfall > 0 (NEG_BAL_ACCTS);
         # with INCIDENT_BUFFER < 1 most liquidations carry no shortfall.
-        self.events: list[tuple[int, float, float, float]] = []
-        self.queue: list[int] = []  # paused-liquidation backlog (raw indices)
+        self.events: list[tuple[int, float, float, float, float]] = []
+        # Execution queue (raw indices): every newly-crossed position is
+        # pushed here and marked liquidated immediately (sticky); only
+        # `capacity_per_min` worth are dequeued (priced + counted) per
+        # tick. `paused` (operator control) forces 0 throughput without
+        # touching `capacity_per_min`. Unbounded capacity (default, all
+        # non-C1 scenarios) drains the whole queue every tick — identical
+        # to the old immediate-execution behaviour.
+        self.queue: list[int] = []
 
         self._lookup_grid = np.arange(0.0, LAR_GRID_MAX + LAR_GRID_STEP / 2, LAR_GRID_STEP)
         self._lookup_share = self._build_lookup()
@@ -242,30 +279,42 @@ class CrashBook:
         crossed = np.where(self.is_long, px <= liq, px >= liq) & survivors
         new_idx = np.flatnonzero(crossed)
 
-        if paused:
-            # Queue, don't execute. Shortfall is realised at flush time at
-            # the then-current (worse) prices — the SPEC trade-off of pausing.
-            self.queue.extend(new_idx.tolist())
-            self.liquidated[new_idx] = True  # sticky: never double-count
-            self.events.append((t, 0.0, 0.0, 0.0))
-            return LiqOutcome(t, 0, 0.0, 0.0, self.fund_usd, self.fund_pct, self.adl_count, len(self.queue))
-
-        # Flush backlog gradually (over ~60 s) when unpaused.
-        if self.queue:
-            release = max(1, len(self.queue) // 30)
-            flush_idx = np.array(self.queue[:release], dtype=int)
-            self.queue = self.queue[release:]
-            new_idx = np.concatenate([new_idx, flush_idx]) if len(new_idx) else flush_idx
-
-        self.liquidated[new_idx] = True
-        self.n_liquidated_raw += len(new_idx)
+        # Newly-crossed positions are sticky (never re-cross) and enter the
+        # execution queue immediately, regardless of throughput or pause.
         if len(new_idx):
+            self.queue.extend(new_idx.tolist())
+            self.liquidated[new_idx] = True
+            self.n_liquidated_raw += len(new_idx)
             self.n_short_liq += int((~self.is_long[new_idx]).sum())
-        per_pos = self._shortfall(new_idx, liq, px_chg) if len(new_idx) else np.zeros(0)
+
+        # Throughput: how many queued positions actually execute this tick.
+        if paused:
+            n_dequeue = 0  # SPEC trade-off: pausing halts execution entirely.
+        elif self.capacity_per_min is None:
+            n_dequeue = len(self.queue)  # unbounded: old immediate behaviour.
+        else:
+            # Budget is clamped to one tick's allotment: idle capacity
+            # during a quiet period must NOT bank up and then unleash as a
+            # burst the moment a backlog forms (that would silently
+            # reproduce the one-tick cliff this queue exists to prevent).
+            cap_per_tick = self.capacity_per_min * TICK_S / 60.0
+            self._dequeue_budget = min(self._dequeue_budget + cap_per_tick, cap_per_tick)
+            n_dequeue = min(len(self.queue), int(self._dequeue_budget))
+            self._dequeue_budget -= n_dequeue
+
+        dequeue_idx = np.array(self.queue[:n_dequeue], dtype=int)
+        self.queue = self.queue[n_dequeue:]
+
+        # Shortfall is realised at *execution* (dequeue) time, at whatever
+        # price/threshold applies now — a backlog draining through a still
+        # falling market slips further and drains the fund faster the
+        # longer it waits (SCHEMA.md).
+        per_pos = self._shortfall(dequeue_idx, liq, px_chg) if n_dequeue else np.zeros(0)
         raw_shortfall = float(per_pos.sum())
         raw_neg = int((per_pos > 0).sum())
         scale = self.book_scale * float(lar_mult)
-        scaled_n = float(len(new_idx)) * scale
+        scaled_n = float(n_dequeue) * scale
+        scaled_unfaulted = float(n_dequeue) * self.book_scale
         scaled_shortfall = raw_shortfall * scale
         scaled_neg = float(raw_neg) * scale
 
@@ -275,9 +324,9 @@ class CrashBook:
         elif scaled_shortfall >= self.fund_usd and scaled_shortfall > 0:
             self.adl_count += 1
         self.fund_usd = max(0.0, self.fund_usd - scaled_shortfall)
-        self.events.append((t, scaled_n, scaled_shortfall, scaled_neg))
+        self.events.append((t, scaled_n, scaled_shortfall, scaled_neg, scaled_unfaulted))
         return LiqOutcome(
-            t, len(new_idx), scaled_n, scaled_shortfall,
+            t, n_dequeue, scaled_n, scaled_shortfall,
             self.fund_usd, self.fund_pct, self.adl_count, len(self.queue),
         )
 
@@ -294,28 +343,37 @@ class CrashBook:
         self.fund_usd += self.start_fund * float(pct) / 100.0
         return self.fund_usd
 
-    def rolling(self, t: int, window_s: int) -> tuple[float, float, float]:
-        """(scaled count, scaled shortfall, scaled neg count) in ``(t-window, t]``."""
-        c, s, n = 0.0, 0.0, 0.0
+    def rolling(self, t: int, window_s: int) -> tuple[float, float, float, float]:
+        """(scaled observed count, scaled shortfall, scaled neg count,
+        scaled unfaulted count) in ``(t-window, t]``."""
+        c, s, n, u = 0.0, 0.0, 0.0, 0.0
         lo = t - window_s
-        for et, ec, es, en in reversed(self.events):
+        for et, ec, es, en, eu in reversed(self.events):
             if et <= lo:
                 break
             c += ec
             s += es
             n += en
-        return c, s, n
+            u += eu
+        return c, s, n, u
 
     def liq_rate(self, t: int) -> float:
-        c, _, _ = self.rolling(t, ROLL_LIQ_S)
+        c, _, _, _ = self.rolling(t, ROLL_LIQ_S)
         return float(c)  # 60 s window ⇒ count == per-minute rate
 
+    def expected_liq_rate(self, t: int) -> float:
+        """LAR denominator: the same executed-throughput series, without
+        ``LAR_MULT`` — "what a fault-free engine would visibly process."
+        See the module docstring and SCHEMA.md."""
+        _, _, _, u = self.rolling(t, ROLL_LIQ_S)
+        return float(u)
+
     def bad_debt_rate(self, t: int) -> float:
-        _, s, _ = self.rolling(t, ROLL_LIQ_S)
+        _, s, _, _ = self.rolling(t, ROLL_LIQ_S)
         return 100.0 * s / self.start_fund if self.start_fund else 0.0
 
     def neg_bal(self, t: int) -> float:
-        _, _, n = self.rolling(t, ROLL_NEG_S)
+        _, _, n, _ = self.rolling(t, ROLL_NEG_S)
         return float(n)
 
     def _long_crossed(self, drop: float) -> int:
@@ -352,3 +410,4 @@ class CrashBook:
         self.adl_count = 0
         self.events.clear()
         self.queue.clear()
+        self._dequeue_budget = 0.0

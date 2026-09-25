@@ -24,6 +24,11 @@ class BookSpec(BaseModel):
     book_scale: float = 1.0
     insurance_fund_usd: float = 250000.0
     slippage: float = 0.35
+    #: Liquidation engine throughput cap, in *executed* liquidations/min
+    #: (raw book units, before `book_scale`/`LAR_MULT`). `None` (default) =
+    #: unbounded — every crossing executes the tick it happens, the old
+    #: behaviour. See `incident/book.py` module docstring and SCHEMA.md.
+    liq_capacity_per_min: float | None = None
 
 
 class ExpectedPoint(BaseModel):

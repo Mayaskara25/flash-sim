@@ -75,7 +75,6 @@ class SignalGenerator:
         self.seed = scenario.spec.seed if seed is None else seed
         self.book = CrashBook(scenario)
         self._px_hist: list[tuple[int, float]] = []  # (t, px_eff)
-        self._drop_hist: list[tuple[int, float]] = []  # (t, drawdown)
         self._last_px_eff = 0.0
         self._applied_topups: set[tuple[str, float, int]] = set()
         self._t = scenario.spec.preroll_s * -1
@@ -84,7 +83,6 @@ class SignalGenerator:
     def reset(self) -> None:
         self.book.reset()
         self._px_hist.clear()
-        self._drop_hist.clear()
         self._last_px_eff = 0.0
         self._applied_topups.clear()
         self._t = self.scenario.spec.preroll_s * -1
@@ -198,12 +196,8 @@ class SignalGenerator:
             )
 
         self._px_hist.append((t, px_eff))
-        drop_now = max(0.0, -px_eff)
-        self._drop_hist.append((t, drop_now))
-
         l_obs = self.book.liq_rate(t)
-        max_drop_win, start_drop = self._drop_window(t, 60)
-        l_exp = self.book.expected_per_min(max_drop_win, start_drop)
+        l_exp = self.book.expected_liq_rate(t)
         lar = lar_ratio(l_obs, l_exp)
 
         values: dict[str, float] = {}
@@ -249,30 +243,3 @@ class SignalGenerator:
         }
         self._t = t
         return SignalFrame(t=t, values=values, flags=flags, meta=meta)
-
-    def _drop_window(self, t: int, window_s: int) -> tuple[float, float]:
-        """(max drawdown inside (t-window, t], drawdown at window start).
-
-        The start value clamps to the earliest recorded drop when the
-        lookback predates the replay, matching the event history's coverage.
-        """
-        start = self._drop_at_or_before(t - window_s)
-        peak = start
-        for ht, hv in self._drop_hist:
-            if ht <= t - window_s:
-                continue
-            if ht > t:
-                break
-            peak = max(peak, hv)
-        return peak, start
-
-    def _drop_at_or_before(self, t: int) -> float:
-        if not self._drop_hist:
-            return 0.0
-        best = self._drop_hist[0][1]
-        for ht, hv in self._drop_hist:
-            if ht <= t:
-                best = hv
-            else:
-                break
-        return best
