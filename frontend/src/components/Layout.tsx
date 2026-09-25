@@ -4,13 +4,13 @@ import { SimControls } from './SimControls'
 import { DataStatus } from './DataStatus'
 
 const NAV = [
-  { to: '/', label: 'Overview' },
-  { to: '/market-crash', label: 'Market Crash' },
-  { to: '/liquidations', label: 'Liquidation Monitor' },
-  { to: '/cascade', label: 'AI Cascade Risk' },
-  { to: '/monte-carlo', label: 'Monte Carlo' },
-  { to: '/exposure', label: 'Exposure' },
-  { to: '/risk-response', label: 'Risk Response' },
+  { to: '/analyst/overview', label: 'Overview' },
+  { to: '/analyst/market-crash', label: 'Market Crash' },
+  { to: '/analyst/liquidations', label: 'Liquidation Monitor' },
+  { to: '/analyst/cascade', label: 'AI Cascade Risk' },
+  { to: '/analyst/monte-carlo', label: 'Monte Carlo' },
+  { to: '/analyst/exposure', label: 'Exposure' },
+  { to: '/analyst/risk-response', label: 'Risk Response' },
 ]
 
 export function Layout() {
@@ -39,6 +39,7 @@ export function Layout() {
             )}
           </div>
           <div className="flex items-center gap-2">
+            <a href="/" className="border border-white/25 px-3 py-1.5 text-[12px] hover:bg-white/10">Incident console</a>
             <button
               type="button"
               onClick={startDemo}
@@ -68,7 +69,7 @@ export function Layout() {
               <NavLink
                 key={item.to}
                 to={item.to}
-                end={item.to === '/'}
+                end={item.to === '/analyst/overview'}
                 className={({ isActive }) =>
                   `border-l-2 px-4 py-2 ${
                     isActive
@@ -92,7 +93,7 @@ export function Layout() {
               <NavLink
                 key={item.to}
                 to={item.to}
-                end={item.to === '/'}
+                end={item.to === '/analyst/overview'}
                 className={({ isActive }) =>
                   `whitespace-nowrap px-2 py-1 ${isActive ? 'font-medium text-navy' : 'text-muted'}`
                 }

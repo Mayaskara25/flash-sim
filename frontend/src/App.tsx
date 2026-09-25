@@ -8,14 +8,17 @@ import { MarketCrashPage } from './pages/MarketCrash'
 import { MonteCarloPage } from './pages/MonteCarlo'
 import { OverviewPage } from './pages/Overview'
 import { RiskResponsePage } from './pages/RiskResponse'
+import { IncidentConsole } from './incident/IncidentConsole'
 
 export default function App() {
   return (
     <SimProvider>
       <BrowserRouter>
         <Routes>
-          <Route element={<Layout />}>
-            <Route index element={<OverviewPage />} />
+          <Route index element={<IncidentConsole />} />
+          <Route path="analyst" element={<Layout />}>
+            <Route index element={<Navigate to="overview" replace />} />
+            <Route path="overview" element={<OverviewPage />} />
             <Route path="market-crash" element={<MarketCrashPage />} />
             <Route path="liquidations" element={<LiquidationMonitorPage />} />
             <Route path="cascade" element={<CascadeRiskPage />} />
