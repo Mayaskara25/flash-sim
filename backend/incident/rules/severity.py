@@ -67,7 +67,10 @@ def _dim_F(frame: SignalFrame, verdict: Verdict) -> float:
         _status_score(
             status_of("NEG_BAL_ACCTS", _get(frame, "NEG_BAL_ACCTS", 0.0)),
             warn_score=2.0,
-            crit_score=4.0,
+            # Negative balances already drive the balance-sheet dimension
+            # through fund depletion. Keep the integrity warning visible
+            # without counting that same loss twice as a SEV-1 score.
+            crit_score=3.0,
         )
     )
     if frame.flags.get("wallet_compromise_suspected", False):
