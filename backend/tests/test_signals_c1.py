@@ -7,9 +7,9 @@
 - `expected` bands from the scenario JSON pass on the no-action run.
 - No-action: fund crosses 25% between T+20 and T+26 (EMERGENCY branch via
   the fund override); LAR stays market-explained (0.7-1.5) throughout;
-  BAD_DEBT_RATE turns on gradually from ~T+3, not as a one-tick cliff.
+  BAD_DEBT_RATE turns on during Warning, not as a one-tick cliff.
 - Reduce-only at T+18 (H3's exact control effects): fund never drops below
-  25% (comfortably above, ~34% floor) and LIQ_RATE < 50/min by T+45.
+  25% (comfortably above, ~42% floor) and LIQ_RATE < 50/min by T+45.
 - Every frame carries the full catalogue + PX and all flags.
 - Full 3600 s replay completes in < 2 s.
 """
@@ -108,17 +108,23 @@ def test_expected_bands_no_action():
 def test_c1_markers():
     """Part A targets 2-4: crash speed, ticket surge, LAR."""
     frames = _replay()
-    # PX flat until ~T-0:30, then falls: PX_CHG_5M <= -5 (warn) within
-    # T+0..T+3, LIQ_RATE >= 100/min by T+2.
+    # Gentle first leg keeps LIQ_RATE in Warning; sharp second leg hits T+14.
     assert frames[0].values["PX_CHG_5M"] > -5.0
-    assert frames[180].values["PX_CHG_5M"] <= -5.0
+    assert frames[180].values["PX_CHG_5M"] > -5.0
+    assert frames[840].values["PX_CHG_5M"] <= -5.0
     assert frames[120].values["LIQ_RATE"] >= 100
+    for minute in range(2, 12):
+        liq = frames[minute * 60].values["LIQ_RATE"]
+        assert 100 <= liq <= 290, (minute, liq)
     # T+6: tickets ~4x baseline (I1).
     assert 3.0 <= frames[360].values["TICKET_RATE"] <= 5.0
     # T+14: LIQ_RATE 350-500/min, fund drained to 35-45% (gradual waterfall,
     # not the 90-100% "fund still intact" of the pre-recalibration track).
     assert 350 <= frames[840].values["LIQ_RATE"] <= 500
     assert 35 <= frames[840].values["INS_FUND_PCT"] <= 45
+    assert frames[900].values["INS_FUND_PCT"] >= 35
+    for minute in range(15, 19):
+        assert frames[minute * 60].values["LIQ_RATE"] >= 150, minute
     # LAR stays market-explained (0.7-1.5) throughout, never SYSTEM/PRICING.
     for t in sorted(frames):
         if t < 0:
@@ -140,16 +146,16 @@ def test_c1_has_no_short_liquidations():
 
 def test_no_action_crosses_25pct_between_T20_T26():
     """Part A target 5 / review row 2: no-action EMERGENCY branch via the
-    fund override, and BAD_DEBT_RATE turns on gradually from ~T+3 (not a
+    fund override, and BAD_DEBT_RATE turns on during Warning (not a
     cliff): no single tick should account for a huge jump once the crash
     is under way."""
     frames = _replay()
     crossing = next(t for t in sorted(frames) if frames[t].values["INS_FUND_PCT"] < 25)
     assert 1200 <= crossing <= 1560, crossing
-    # Gradual: BAD_DEBT_RATE > 0 from around T+3 onward (not first appearing
+    # Gradual: BAD_DEBT_RATE > 0 before the T+12 acceleration (not first appearing
     # right at the crossing, i.e. not a single-tick cliff from 100% to <25%).
     first_bad_debt = next(t for t in sorted(frames) if frames[t].values["BAD_DEBT_RATE"] > 0)
-    assert 120 <= first_bad_debt <= 300, first_bad_debt
+    assert 300 <= first_bad_debt <= 720, first_bad_debt
 
 
 def test_reduce_only_at_T18_contains_cascade():

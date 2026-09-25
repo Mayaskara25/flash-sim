@@ -58,6 +58,7 @@ def _run(
             "overrides": s.overrides,
             "score": s.score,
             "fund": frame.values["INS_FUND_PCT"],
+            "liq": frame.values["LIQ_RATE"],
         }
         t += TICK_S
     return out
@@ -80,6 +81,13 @@ def test_warning_by_T3_critical_by_T15():
     assert any(
         r["state"] in ("CRITICAL", "EMERGENCY") for t, r in recs.items() if 0 <= t <= 900
     ), "expected CRITICAL by T+15"
+    for minute in range(1, 12):
+        row = recs[minute * 60]
+        assert row["state"] == "WARNING", (minute, row)
+        assert 100 <= row["liq"] <= 290, (minute, row)
+        assert row["score"] < 50, (minute, row)
+    first_critical = min(t for t, row in recs.items() if row["state"] == "CRITICAL")
+    assert 660 < first_critical <= 900, first_critical
 
 
 def test_classifier_never_system_pricing_collateral():
