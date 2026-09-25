@@ -11,9 +11,9 @@ returns a memoryless ``SignalFrame`` per tick:
 - Every other catalogue signal comes from its scripted track, or sits at
   its catalogue baseline plus seeded noise.
 
-Determinism: noise uses ``np.random.default_rng(seed + tick_index)`` and one
-draw per signal in sorted-code order, so any tick is reproducible regardless
-of call order. Same seed + same scenario + same effects ⇒ byte-identical
+Determinism: noise uses ``np.random.default_rng`` seeded per (seed, tick,
+signal) via a stable crc32 salt, so any tick is reproducible regardless of
+call order. Same seed + same scenario + same effects ⇒ byte-identical
 frames.
 """
 

@@ -120,6 +120,7 @@ class CrashBook:
         self.starts = np.array([ASSETS[a]["start"] for a in assets], dtype=float)
 
         self.liquidated = np.zeros(self.n_total, dtype=bool)
+        self.n_short_liq = 0
         # Cold start: positions already past their threshold at the build
         # price (entry-spread outliers) are marked liquidated silently — no
         # events, no fund impact. Otherwise they all "liquidate" in tick 1
@@ -133,6 +134,20 @@ class CrashBook:
 
         self._lookup_grid = np.arange(0.0, LAR_GRID_MAX + LAR_GRID_STEP / 2, LAR_GRID_STEP)
         self._lookup_share = self._build_lookup()
+        # Exact per-position crossing drops for the LAR denominator (see
+        # expected_per_min): grid interpolation error dominates the sparse
+        # tail (first tenths of a percent), phantom-raising LAR at crash
+        # onset. d_i = NVDA drawdown at which a LONG crosses its base
+        # threshold (px_chg <= (liq/start - 1)/beta, i.e. drop >= d_i).
+        # Shorts are excluded: their crossed-set SHRINKS as drops grow
+        # (they uncross while falling), which made exact counts non-monotonic
+        # and undercounted the denominator. Intra-window short crossings on
+        # rallies are not modelled — our scenarios never rally above start
+        # (C1 has zero short crossings; asserted in test_signals_c1).
+        base_liq = self._liq_thresholds()
+        with np.errstate(divide="ignore", invalid="ignore"):
+            move = (base_liq / self.starts - 1.0) / self.betas
+        self._long_d = np.sort(-move[self.is_long])
 
     # -- setup -----------------------------------------------------------
     def _liq_thresholds(
@@ -222,6 +237,8 @@ class CrashBook:
 
         self.liquidated[new_idx] = True
         self.n_liquidated_raw += len(new_idx)
+        if len(new_idx):
+            self.n_short_liq += int((~self.is_long[new_idx]).sum())
         per_pos = self._shortfall(new_idx, liq, tick_move) if len(new_idx) else np.zeros(0)
         raw_shortfall = float(per_pos.sum())
         raw_neg = int((per_pos > 0).sum())
@@ -279,23 +296,35 @@ class CrashBook:
         _, _, n = self.rolling(t, ROLL_NEG_S)
         return float(n)
 
+    def _long_crossed(self, drop: float) -> int:
+        """Long positions with base crossing drop <= ``drop`` (exact)."""
+        return int(np.searchsorted(self._long_d, drop, side="right"))
+
     def expected_per_min(self, max_drop_win: float, start_drop: float) -> float:
-        # Lookup shares are cumulative fractions of the *original* book, so
-        # the per-minute increment is N_initial x Δshare. (SPEC §9.2 writes
-        # N_open; with sticky liquidation the increment over the initial book
-        # is the quantity that matches observed crossings, keeping LAR ≈ 1
-        # on pure market moves.)
+        # Exact long-threshold counting (not the gridded table): the longs
+        # crossing in a window are precisely those whose crossing drop lies
+        # in (start_drop, max_drop_win]. SPEC §9.2's lookup table
+        # (``lookup_share``, kept as the published artifact and for coarse
+        # queries) approximates this; grid interpolation error in the sparse
+        # tail phantom-raised LAR at crash onset, so the denominator counts
+        # exactly. (SPEC writes N_open; the increment over the initial book
+        # is the quantity matching observed sticky crossings.)
         #
         # The window's *maximum* drawdown (not the instantaneous drop) is
         # used so the expectation covers the same trailing 60 s the observed
         # rolling count does. An instantaneous diff collapses to 0 the moment
         # price bottoms while the rolling count still holds trough crossings,
         # phantom-spiking LAR on every recovery onset.
-        share = max(0.0, self.lookup_share(max_drop_win) - self.lookup_share(start_drop))
-        return float(self.n_total) * self.book_scale * share
+        #
+        # Intra-window short crossings on rallies are not modelled (our
+        # scenarios never rally above start; C1 has zero short crossings —
+        # asserted in test_signals_c1).
+        n = self._long_crossed(max_drop_win) - self._long_crossed(start_drop)
+        return float(max(n, 0)) * self.book_scale
 
     def reset(self) -> None:
         self.liquidated[:] = False
+        self.n_short_liq = 0
         self._mark_cold_start()
         self.fund_usd = self.start_fund
         self.adl_count = 0

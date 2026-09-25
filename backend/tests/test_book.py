@@ -6,11 +6,11 @@ from incident.book import CrashBook
 from incident.scenario_loader import BookSpec, ScenarioLoader, ScenarioSpec
 
 
-def _scenario(px_drop: float = -0.06, lar_mult: float = 1.0, fund: float = 4_080_000.0) -> ScenarioLoader:
+def _scenario(px_drop: float = -0.06, lar_mult: float = 1.0, fund: float = 135_000.0) -> ScenarioLoader:
     spec = ScenarioSpec(
         id="T", name="t", description="t", duration_s=900, seed=42, asset="NVDA",
-        book=BookSpec(insurance_fund_usd=fund),
-        tracks={"PX": [[-120, 0.0], [0, px_drop], [900, px_drop]]},
+        book=BookSpec(insurance_fund_usd=fund, slippage=40.0),
+        tracks={"PX": [[-120, 0.0], [0, 0.0], [240, px_drop], [900, px_drop]]},
         faults={"LAR_MULT": [[-120, lar_mult]]},
     )
     return ScenarioLoader(spec)
