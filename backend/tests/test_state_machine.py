@@ -134,6 +134,12 @@ def test_stabilising_recritical_on_critical_recross() -> None:
 
 
 def test_stabilising_resolves_after_15min_below_warn_plus_ic() -> None:
+    """INS_FUND_PCT sits flat at its 100.0 baseline the whole run, so the
+    decision #13 flatness check (PLAN §3) needs a full RESOLVE_S of its own
+    history before it can first read "settled" (it starts recording at
+    t=0, same as every other signal here) -- then another RESOLVE_S of
+    continuous settledness before resolve is proposed. That is why this
+    fixture runs out past t=1800, not just 900 s past STABILISING entry."""
     sm, hist = StateMachine(), SignalHistory()
     step_at(sm, hist, 0, {"LIQ_RATE": 400.0})
     t = 2
@@ -143,13 +149,78 @@ def test_stabilising_resolves_after_15min_below_warn_plus_ic() -> None:
     sm.confirm("IC", t)
     assert sm.state == "STABILISING"
     assert sm.pending is None
-    while t <= 400 + 950:
+    while t <= 1850:
         step_at(sm, hist, t, {})
         t += 2
     assert sm.pending is not None
     assert sm.pending.kind == "resolve"
     sm.confirm("IC", t)
     assert sm.state == "RESOLVED"
+
+
+def test_resolve_when_fund_flat_and_everything_else_calm() -> None:
+    """PLAN §3 decision #13: INS_FUND_PCT settled at 40% -- below the 60%
+    warn line, above the 25% critical override, never satisfying the plain
+    "< warn" rule -- with everything else calm still reaches pending
+    resolve, because the resolve check treats INS_FUND_PCT as settled once
+    it is flat (< 1 pp change) over the trailing 15 min. The fund has been
+    flat at 40% since t=0 here, so once STABILISING is calm there is
+    already a full RESOLVE_S of fund history and only one more RESOLVE_S
+    wait is needed (contrast the baseline-fund fixture above, where the
+    fund only *starts* being tracked at STABILISING entry and so needs two
+    stacked RESOLVE_S windows)."""
+    sm, hist = StateMachine(), SignalHistory()
+    t = 0
+    while t <= 900:
+        step_at(sm, hist, t, {"LIQ_RATE": 400.0, "INS_FUND_PCT": 40.0})
+        t += 2
+    assert sm.state == "CRITICAL"
+    calm_start = t
+    while t <= calm_start + 300:
+        step_at(sm, hist, t, {"LIQ_RATE": 5.0, "INS_FUND_PCT": 40.0})
+        t += 2
+    assert sm.pending is not None
+    assert sm.pending.kind == "stepdown"
+    sm.confirm("IC", t)
+    assert sm.state == "STABILISING"
+    stab_start = t
+    while t <= stab_start + 900:
+        step_at(sm, hist, t, {"LIQ_RATE": 5.0, "INS_FUND_PCT": 40.0})
+        t += 2
+    assert sm.pending is not None
+    assert sm.pending.kind == "resolve"
+
+
+def test_no_resolve_when_fund_still_falling() -> None:
+    """PLAN §3 decision #13: a fund that keeps drifting down (more than
+    1 pp of change over any trailing 15 min) never reads "settled", so
+    STABILISING never proposes resolve even though every other signal is
+    calm and the fund stays above the 25% critical override the whole
+    time (no recritical override either)."""
+    sm, hist = StateMachine(), SignalHistory()
+
+    def fund_at(t: int) -> float:
+        return 80.0 - t / 100.0  # drifts down ~9 pp per 900 s: never flat
+
+    t = 0
+    while t <= 900:
+        step_at(sm, hist, t, {"LIQ_RATE": 400.0, "INS_FUND_PCT": fund_at(t)})
+        t += 2
+    assert sm.state == "CRITICAL"
+    calm_start = t
+    while t <= calm_start + 300:
+        step_at(sm, hist, t, {"LIQ_RATE": 5.0, "INS_FUND_PCT": fund_at(t)})
+        t += 2
+    assert sm.pending is not None
+    assert sm.pending.kind == "stepdown"
+    sm.confirm("IC", t)
+    assert sm.state == "STABILISING"
+    stab_start = t
+    while t <= stab_start + 1200:
+        step_at(sm, hist, t, {"LIQ_RATE": 5.0, "INS_FUND_PCT": fund_at(t)})
+        t += 2
+    assert sm.pending is None
+    assert sm.state == "STABILISING"
 
 
 def test_manual_raise_only_goes_up() -> None:

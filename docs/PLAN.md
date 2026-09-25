@@ -48,6 +48,7 @@ A **one-screen incident console** for MochaTrade's 3-person ops team (IC = Incid
 10. **Console becomes the landing page (`/`).** The existing 7 pages move under `/analyst/*` as drill-downs, reachable from signal cards. They are not deleted.
 11. **All numbers are prototype assumptions** (spec §13.3). The UI shows a persistent "SIMULATION" badge and an Assumptions panel.
 12. **Roles in the UI:** a role switcher (All / IC / TL / CS). There is no auth; the actor is whoever the switcher says.
+13. **STABILISING → RESOLVED treats INS_FUND_PCT specially.** The plain "all signals < warn for 15 min" rule can never fire once the fund settles below its 60% warn line without a top-up (e.g. ~40%, as C1's no-action-recovered / reduce-only fund floor does). For the resolve check only, INS_FUND_PCT instead counts as settled when it is above its 25% critical override and flat (absolute change < 1 percentage point) over the trailing 15 sim-min — SPEC M2's exit condition ("INS_FUND_PCT stable for 15 min"). Every other signal keeps the "< warn" requirement.
 
 ## 4. Architecture
 

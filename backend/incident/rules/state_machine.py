@@ -6,6 +6,7 @@ Upward moves are automatic; downward moves from CRITICAL/EMERGENCY need
 
 from __future__ import annotations
 
+from collections import deque
 from dataclasses import dataclass, field
 
 from incident.catalogue import SIGNALS, status_of
@@ -16,6 +17,19 @@ from .severity import SeverityResult
 
 STEPDOWN_S = 300  # 5 sim-min below band before a step-down is proposed
 RESOLVE_S = 900  # 15 sim-min below warn before resolve is proposed
+
+# PLAN §3 decision #13: the STABILISING -> RESOLVED check requires "all
+# signals < warn for 15 min", which can never fire for INS_FUND_PCT if the
+# fund settles below its 60% warn line without a top-up (e.g. ~40%, well
+# above the 25% critical override but still "warn" forever). For the
+# resolve check ONLY, INS_FUND_PCT instead counts as settled once it is
+# above critical (guaranteed here: a critical reading already forces
+# STABILISING -> CRITICAL before this check runs) and flat -- its absolute
+# change over the trailing 15 sim-min is under FUND_FLAT_PP -- matching
+# SPEC M2's exit condition ("INS_FUND_PCT stable for 15 min"). Every other
+# signal keeps the plain "< warn" requirement.
+FUND_CODE = "INS_FUND_PCT"
+FUND_FLAT_PP = 1.0
 
 _RANK: dict[str, int] = {
     "NORMAL": 0,
@@ -80,6 +94,10 @@ class StateMachine:
     _below_since: int | None = None
     _stable_below_since: int | None = None
     log: list[TransitionEvent] = field(default_factory=list)
+    # Rolling INS_FUND_PCT samples for the resolve-check flatness rule
+    # (decision #13). Recorded every `step()` call, in any state, so the
+    # trailing-15-min window is accurate by the time STABILISING is reached.
+    _fund_hist: deque[tuple[int, float]] = field(default_factory=deque)
 
     # -- target ---------------------------------------------------------
     def target(
@@ -110,11 +128,38 @@ class StateMachine:
             return "WATCH"
         return "NORMAL"
 
+    # -- fund flatness (decision #13) ------------------------------------
+    def _record_fund(self, t: int, frame: SignalFrame) -> None:
+        v = frame.values.get(FUND_CODE)
+        if v is None:
+            return
+        self._fund_hist.append((t, float(v)))
+        cutoff = t - RESOLVE_S - 120  # small buffer past the window we need
+        while len(self._fund_hist) > 1 and self._fund_hist[0][0] < cutoff:
+            self._fund_hist.popleft()
+
+    def _fund_settled(self, t: int, current: float) -> bool:
+        """True if INS_FUND_PCT's absolute change over the trailing
+        `RESOLVE_S` is under `FUND_FLAT_PP`. Requires a sample at or before
+        `t - RESOLVE_S` (full window coverage), same rule as
+        `SignalHistory.held`."""
+        if not self._fund_hist or self._fund_hist[0][0] > t - RESOLVE_S:
+            return False
+        target = t - RESOLVE_S
+        then = self._fund_hist[0][1]
+        for ht, hv in self._fund_hist:
+            if ht <= target:
+                then = hv
+            else:
+                break
+        return abs(current - then) < FUND_FLAT_PP
+
     # -- stepping --------------------------------------------------------
     def step(
         self, t: int, sev: SeverityResult, frame: SignalFrame
     ) -> tuple[IncidentState, list[TransitionEvent]]:
         events: list[TransitionEvent] = []
+        self._record_fund(t, frame)
         if self.state == "RESOLVED":
             return self.state, events
 
@@ -167,11 +212,15 @@ class StateMachine:
             self._stable_below_since = None
             events.extend(self._move(t, "CRITICAL"))
             return events
-        all_below_warn = all(
-            (v := frame.values.get(sig.code)) is None
-            or status_of(sig.code, float(v)) not in ("warn", "critical")
-            for sig in SIGNALS
-        )
+        def _settled(sig) -> bool:
+            v = frame.values.get(sig.code)
+            if v is None:
+                return True
+            if sig.code == FUND_CODE:
+                return self._fund_settled(t, float(v))
+            return status_of(sig.code, float(v)) not in ("warn", "critical")
+
+        all_below_warn = all(_settled(sig) for sig in SIGNALS)
         if all_below_warn:
             if self._stable_below_since is None:
                 self._stable_below_since = t
