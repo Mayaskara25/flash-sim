@@ -1,26 +1,22 @@
 #!/usr/bin/env bash
 # P2 Risk Engine — Linux/macOS equivalent of start.ps1.
 #
-# Sets up the backend venv and frontend node_modules if missing, then runs
-# uvicorn (port 8000) and `npm run dev` (port 5173) together. Ctrl-C stops
-# both.
+# Uses dependencies installed before the demo; never downloads on stage.
+# Runs uvicorn (port 8000) and Vite (port 5173) together. Ctrl-C stops both.
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_DIR="$ROOT_DIR/backend"
 FRONTEND_DIR="$ROOT_DIR/frontend"
 
-if [ ! -d "$BACKEND_DIR/.venv" ]; then
-  echo "==> Creating backend venv"
-  python3 -m venv "$BACKEND_DIR/.venv"
+if [ ! -x "$BACKEND_DIR/.venv/bin/python" ]; then
+  echo "Backend environment missing. Before the demo, run: python3 -m venv backend/.venv && backend/.venv/bin/pip install -r backend/requirements.txt" >&2
+  exit 1
 fi
 
-echo "==> Installing backend dependencies"
-"$BACKEND_DIR/.venv/bin/pip" install -q -r "$BACKEND_DIR/requirements.txt"
-
 if [ ! -d "$FRONTEND_DIR/node_modules" ]; then
-  echo "==> Installing frontend dependencies"
-  (cd "$FRONTEND_DIR" && npm install)
+  echo "Frontend dependencies missing. Before the demo, run: cd frontend && npm ci" >&2
+  exit 1
 fi
 
 PIDS=()
