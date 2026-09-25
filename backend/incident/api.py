@@ -142,7 +142,7 @@ def inject(body: InjectBody):
         if not _session.started:
             raise SessionError("Start a scenario first")
         _session.injects.append((body.event, _session.frame.t))
-        _session._log("note", f"Injected {body.event} overlay for five sim-minutes")
+        _session._log("note", f"Injected {body.event} temporary overlay")
     return _run(add)
 
 
