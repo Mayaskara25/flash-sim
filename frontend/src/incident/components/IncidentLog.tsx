@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { fmtNumber } from '../format'
 import type { AlertCard, LiqReview, LogEntry, Role } from '../types'
 
@@ -10,11 +10,18 @@ export function IncidentLog({ log, alerts, role, busy, onAck, onNote, onReview }
   const [review, setReview] = useState<LiqReview>('under-review')
   const [rationale, setRationale] = useState('')
   const [expanded, setExpanded] = useState<number | null>(null)
+  const latestId = useRef(Math.max(0, ...log.map((entry) => entry.id)))
+  const [newCount, setNewCount] = useState(0)
+  useEffect(() => {
+    const added = log.filter((entry) => entry.id > latestId.current).length
+    latestId.current = Math.max(0, ...log.map((entry) => entry.id))
+    if (added) setNewCount((count) => count + added)
+  }, [log])
   const actor: Role = role === 'All' ? 'IC' : role
   const entries = log.filter((entry) => filter === 'all' || entry.type === filter).slice().reverse()
   const activeAlerts = alerts.filter((alert) => !alert.acknowledged_by)
   return <section className="border border-line bg-white p-3 md:p-4" aria-label="Incident log">
-    <div className="flex flex-wrap items-baseline justify-between gap-2"><h2 className="text-xs font-bold uppercase tracking-[0.13em]">Incident log</h2><span className="text-[11px] text-muted">{log.length} entries · newest first</span></div>
+    <div className="flex flex-wrap items-baseline justify-between gap-2"><h2 className="text-xs font-bold uppercase tracking-[0.13em]">Incident log</h2><div className="flex items-center gap-2">{newCount > 0 && <button type="button" onClick={() => setNewCount(0)} className="border border-blue-300 bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-900">{newCount} new · dismiss</button>}<span className="text-[11px] text-muted">{log.length} entries · newest first</span></div></div>
     {activeAlerts.length > 0 && <div className="mt-3 flex flex-wrap gap-1.5">{activeAlerts.map((alert) => <button key={alert.id} type="button" disabled={busy} onClick={() => void onAck(alert.id, actor).catch(() => {})} className="border border-amber-300 bg-amber-50 px-2 py-1 text-[11px] text-amber-950 disabled:opacity-50">Acknowledge {alert.signal} · {alert.count}×</button>)}</div>}
     <div className="mt-3 flex flex-wrap gap-1" role="group" aria-label="Filter log entries">{filters.map((item) => <button key={item} type="button" onClick={() => setFilter(item)} className={`border px-2 py-1 text-[10px] capitalize ${filter === item ? 'border-navy bg-navy text-white' : 'border-line text-muted'}`}>{item}</button>)}</div>
     <ol className="mt-3 max-h-80 divide-y divide-line overflow-y-auto border-y border-line">{entries.length ? entries.map((entry) => <li key={entry.id} className="py-2 text-xs"><div className="flex gap-2"><span className="w-14 shrink-0 font-mono text-[11px] text-muted">{entry.t_label}</span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-1.5"><span className="font-semibold uppercase text-navy">{entry.type}</span><span className="text-[10px] text-muted">{entry.actor} · SEV-{entry.sev}</span>{entry.liquidation_review && <span className="border border-amber-300 px-1 text-[10px] text-amber-900">Liq: {entry.liquidation_review}</span>}</div><p className="mt-0.5 leading-snug">{entry.action}</p>{entry.rationale && <p className="mt-1 text-[11px] text-muted">Why: {entry.rationale}</p>}{Object.keys(entry.signal_snapshot).length > 0 && <><button type="button" onClick={() => setExpanded((id) => id === entry.id ? null : entry.id)} className="mt-1 text-[11px] text-navy underline">{expanded === entry.id ? 'Hide' : 'Show'} signal snapshot</button>{expanded === entry.id && <p className="mt-1 font-mono text-[10px] text-muted">{Object.entries(entry.signal_snapshot).map(([key, value]) => `${key} ${fmtNumber(value)}`).join(' · ')}</p>}</>}</div></div></li>) : <li className="p-4 text-xs text-muted">No log entries match this filter.</li>}</ol>

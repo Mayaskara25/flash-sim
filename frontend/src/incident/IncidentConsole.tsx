@@ -4,6 +4,7 @@ import { roleLabel } from './format'
 import { useIncident } from './useIncident'
 import { shortcutFor } from './shortcuts'
 import { Toasts } from './Toasts'
+import { roleFocus } from './roleFocus'
 import type { Role } from './types'
 import { ActionList } from './components/ActionList'
 import { IncidentLog } from './components/IncidentLog'
@@ -44,7 +45,7 @@ export function IncidentConsole() {
   if (!state) return <main className="min-h-screen bg-bg p-8 text-sm text-muted"><h1 className="text-base font-bold text-ink">Flash-crash incident console</h1><p className="mt-3">{error ? 'Unable to load incident state.' : 'Loading incident state…'}</p><Toasts error={error} onDismiss={actions.clearError} /></main>
   const messageActor: Role = role === 'All' ? 'CS' : role
   return <div className="min-h-screen bg-bg text-ink">
-    <header className="flex flex-wrap items-center justify-between gap-2 border-b border-line bg-white px-4 py-2 md:px-6"><div><div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">MochaTrade / Operations</div><h1 className="text-base font-bold tracking-tight">Flash-crash incident console</h1></div><Link to="/analyst/overview" className="border border-line px-3 py-1.5 text-xs font-semibold text-navy hover:bg-slate-50">Open analyst views ↗</Link></header>
+    <header className="flex flex-wrap items-center justify-between gap-2 border-b border-line bg-white px-4 py-2 md:px-6"><div><div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">MochaTrade / Operations</div><h1 className="text-base font-bold tracking-tight">Flash-crash incident console</h1></div><div className="flex gap-2">{state.severity.state === 'RESOLVED' && <Link to={`/summary${mock ? '?mock=1' : ''}`} className="bg-navy px-3 py-1.5 text-xs font-semibold text-white">View summary ↗</Link>}<Link to="/analyst/overview" className="border border-line px-3 py-1.5 text-xs font-semibold text-navy hover:bg-slate-50">Open analyst views ↗</Link></div></header>
     <SeverityBanner state={state} scenarios={scenarios} actions={actions} busy={busy} mock={mock} stale={stale} />
     <Toasts error={error} onDismiss={actions.clearError} />
     <main className="grid gap-3 p-3 md:p-4 xl:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
@@ -53,6 +54,7 @@ export function IncidentConsole() {
         <section className="border border-line bg-white p-3 md:p-4" aria-label="Next actions">
           <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-xs font-bold uppercase tracking-[0.13em]">Next actions</h2><RoleSwitcher value={role} onChange={changeRole} /></div>
           <p className="mt-2 text-xs text-muted">{role === 'All' ? 'Three-person response team' : roleLabel[role]} · human approval required for every control and message.</p>
+          <p className="mt-1 border-l-2 border-navy bg-slate-50 px-2 py-1.5 text-[11px] leading-snug"><strong>{roleFocus(state.sim.t, role).phase}:</strong> {roleFocus(state.sim.t, role).text}</p>
           {state.severity.pending && <div className="mt-3 border border-amber-300 bg-amber-50 p-3 text-xs"><strong>Step-down ready:</strong> {state.severity.pending.from} → {state.severity.pending.to}. IC confirmation required. <button type="button" disabled={busy || role !== 'IC'} onClick={() => void actions.confirmPending({ actor: 'IC' }).catch(() => {})} className="ml-2 border border-amber-700 px-2 py-1 font-semibold text-amber-950 disabled:opacity-50">Confirm as IC</button></div>}
           {state.reminders.length > 0 && <div className="mt-3 border-l-2 border-amber-500 bg-amber-50 p-2 text-[11px] text-amber-950">{state.reminders.join(' · ')}</div>}
           <div className="mt-3"><ActionList actions={state.actions} viewRole={role} busy={busy} onDecide={(action, decision, rationale, actor) => actions.decideAction(action.id, { decision, rationale, actor })} /></div>

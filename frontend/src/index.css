@@ -33,3 +33,16 @@ body,
 input[type="range"] {
   accent-color: #334e68;
 }
+
+@keyframes incident-crossed {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  35% { box-shadow: 0 0 0 3px #f59e0b80; }
+}
+
+.incident-crossed {
+  animation: incident-crossed 2.5s ease-in-out 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .incident-crossed { animation: none; }
+}
