@@ -32,7 +32,7 @@ def test_priority_control_dedupe_and_role_cap():
     ctx = ProposalContext(active_tags=("I1", "M2", "P3"), sev=1, t=900)
     actions = propose(ctx)
     assert priority_order(list(ctx.active_tags)) == ["P3", "M2", "I1"]
-    assert next(a for a in actions if a.tag is not None).tag == "P3"
+    assert actions[0].tag == "P3"
     control_ids = [a.control_id for a in actions if a.control_id]
     assert len(control_ids) == len(set(control_ids))
     for role in ("IC", "TL", "CS"):

@@ -202,18 +202,25 @@ def propose(ctx: ProposalContext) -> list[ProposedAction]:
     This function does not mutate session state or publish messages.
     """
     rows: list[tuple[Tag | None, Step]] = []
+    # A suspected key compromise outranks routine incident administration.
+    if "P3" in ctx.active_tags:
+        rows.extend(("P3", step) for step in PLAYBOOKS["P3"].steps)
     if ctx.unacknowledged_alerts:
         rows.append((None, Step("runbook.ack", "IC", "Acknowledge the active incident alert.")))
     if ctx.sev == 1:
         rows.append((None, Step("runbook.founders", "IC", "Page founders for SEV-1.")))
     for tag in priority_order(ctx.active_tags):
+        if tag == "P3":
+            continue
         rows.extend((tag, step) for step in PLAYBOOKS[tag].steps)
     if ctx.sev <= 2 and ctx.last_customer_comm_t is not None and ctx.t - ctx.last_customer_comm_t > 900:
         rows.append((None, Step("runbook.update", "CS", "Send the overdue customer update.")))
     for control in ctx.expired_controls:
         rows.append((None, Step(f"runbook.review.{control}", "IC", f"Review expired {control} control.")))
-    if ctx.pending_confirmation:
+    if ctx.pending_confirmation and "P3" not in ctx.active_tags:
         rows.insert(0, (None, Step("runbook.stepdown", "IC", "Confirm the pending severity step-down.")))
+    elif ctx.pending_confirmation:
+        rows.append((None, Step("runbook.stepdown", "IC", "Confirm the pending severity step-down.")))
 
     result: list[ProposedAction] = []
     seen_controls: set[str] = set(ctx.active_controls)
