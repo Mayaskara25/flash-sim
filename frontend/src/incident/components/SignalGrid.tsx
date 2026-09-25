@@ -11,6 +11,7 @@ export function SignalGrid({ signals, alerts }: { signals: SignalView[]; alerts:
   const sorted = [...signals].sort((a, b) => Number(b.relevant) - Number(a.relevant) || rank[a.status] - rank[b.status] || coreRank(a.code) - coreRank(b.code) || a.code.localeCompare(b.code))
   const primary = sorted.slice(0, 6)
   const rest = sorted.slice(6)
+  if (import.meta.env.DEV && primary.length > 6) throw new Error('More than six expanded incident signals')
   return <section aria-label="Active signals" className="border border-line bg-white p-3 md:p-4">
     <div className="mb-3 flex items-baseline justify-between gap-2"><h2 className="text-xs font-bold uppercase tracking-[0.13em] text-ink">Active signals</h2><span className="text-[11px] text-muted">{signals.length} monitored · 6 shown</span></div>
     <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-2">{primary.map((signal) => <SignalCard key={signal.code} signal={signal} alerts={alerts} />)}</div>

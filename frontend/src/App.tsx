@@ -9,6 +9,7 @@ import { MonteCarloPage } from './pages/MonteCarlo'
 import { OverviewPage } from './pages/Overview'
 import { RiskResponsePage } from './pages/RiskResponse'
 import { IncidentConsole } from './incident/IncidentConsole'
+import { IncidentSummaryPage } from './incident/IncidentSummaryPage'
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route index element={<IncidentConsole />} />
+          <Route path="summary" element={<IncidentSummaryPage />} />
           <Route path="analyst" element={<Layout />}>
             <Route index element={<Navigate to="overview" replace />} />
             <Route path="overview" element={<OverviewPage />} />
