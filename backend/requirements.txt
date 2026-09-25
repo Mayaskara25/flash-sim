@@ -5,3 +5,5 @@ pandas
 scikit-learn
 pydantic
 python-multipart
+pytest
+httpx

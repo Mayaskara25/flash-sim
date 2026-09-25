@@ -1,0 +1,470 @@
+{
+  "scenario_id": "C1",
+  "started_t": -60,
+  "ended_t": 3300,
+  "peak_sev": 2,
+  "timeline": [
+    {
+      "id": 1,
+      "t": -60,
+      "t_label": "T-01:00",
+      "type": "transition",
+      "sev": 4,
+      "scenario_tags": [],
+      "actor": "system",
+      "action": "Incident timer started for scenario C1 'Black Tuesday'.",
+      "rationale": null,
+      "signal_snapshot": {},
+      "liquidation_review": null,
+      "approved_by": null,
+      "expires_at": null,
+      "ref": null
+    },
+    {
+      "id": 2,
+      "t": 0,
+      "t_label": "T+00:00",
+      "type": "transition",
+      "sev": 3,
+      "scenario_tags": [
+        "M1"
+      ],
+      "actor": "system",
+      "action": "NORMAL -> WARNING (PX_CHG_5M -6.1%, LIQ_RATE 102/min).",
+      "rationale": null,
+      "signal_snapshot": {
+        "PX_CHG_5M": -6.1,
+        "LIQ_RATE": 102.0
+      },
+      "liquidation_review": null,
+      "approved_by": null,
+      "expires_at": null,
+      "ref": null
+    },
+    {
+      "id": 10,
+      "t": 850,
+      "t_label": "T+14:10",
+      "type": "transition",
+      "sev": 2,
+      "scenario_tags": [
+        "M1",
+        "I1",
+        "M2"
+      ],
+      "actor": "system",
+      "action": "WARNING -> CRITICAL (LIQ_RATE 405/min, INS_FUND_PCT 41%).",
+      "rationale": null,
+      "signal_snapshot": {
+        "LIQ_RATE": 405.0,
+        "INS_FUND_PCT": 41.0
+      },
+      "liquidation_review": null,
+      "approved_by": null,
+      "expires_at": null,
+      "ref": null
+    },
+    {
+      "id": 18,
+      "t": 2420,
+      "t_label": "T+40:20",
+      "type": "transition",
+      "sev": 2,
+      "scenario_tags": [
+        "M1",
+        "I1",
+        "M2"
+      ],
+      "actor": "system",
+      "action": "CRITICAL -> STABILISING.",
+      "rationale": null,
+      "signal_snapshot": {},
+      "liquidation_review": null,
+      "approved_by": null,
+      "expires_at": null,
+      "ref": null
+    },
+    {
+      "id": 21,
+      "t": 3295,
+      "t_label": "T+54:55",
+      "type": "transition",
+      "sev": 4,
+      "scenario_tags": [
+        "M1",
+        "I1",
+        "M2"
+      ],
+      "actor": "system",
+      "action": "STABILISING -> RESOLVED.",
+      "rationale": null,
+      "signal_snapshot": {},
+      "liquidation_review": null,
+      "approved_by": null,
+      "expires_at": null,
+      "ref": null
+    }
+  ],
+  "peaks": [
+    {
+      "signal": "LIQ_RATE",
+      "value": 410.0,
+      "t": 872
+    },
+    {
+      "signal": "INS_FUND_PCT",
+      "value": 38.0,
+      "t": 900
+    },
+    {
+      "signal": "PX_CHG_5M",
+      "value": -9.8,
+      "t": 850
+    },
+    {
+      "signal": "TICKET_RATE",
+      "value": 4.3,
+      "t": 872
+    },
+    {
+      "signal": "LAR",
+      "value": 1.2,
+      "t": 900
+    }
+  ],
+  "decisions": [
+    {
+      "id": 3,
+      "t": 20,
+      "t_label": "T+00:20",
+      "type": "decision",
+      "sev": 3,
+      "scenario_tags": [
+        "M1"
+      ],
+      "actor": "IC",
+      "action": "Acknowledged Warning alert.",
+      "rationale": "Confirmed sharp move on the primary book; LAR 1.1, nominal.",
+      "signal_snapshot": {
+        "PX_CHG_5M": -6.1,
+        "LIQ_RATE": 102.0,
+        "LAR": 1.1
+      },
+      "liquidation_review": "market-explained",
+      "approved_by": "IC",
+      "expires_at": null,
+      "ref": "a1"
+    },
+    {
+      "id": 4,
+      "t": 45,
+      "t_label": "T+00:45",
+      "type": "decision",
+      "sev": 3,
+      "scenario_tags": [
+        "M1"
+      ],
+      "actor": "TL",
+      "action": "Confirmed price feed and liquidation engine healthy.",
+      "rationale": "ORACLE_AGE 1s, API_ERR_PCT 0.3%, no engine errors.",
+      "signal_snapshot": {
+        "ORACLE_AGE": 1.0,
+        "API_ERR_PCT": 0.3
+      },
+      "liquidation_review": null,
+      "approved_by": "TL",
+      "expires_at": null,
+      "ref": "a2"
+    },
+    {
+      "id": 5,
+      "t": 90,
+      "t_label": "T+01:30",
+      "type": "decision",
+      "sev": 3,
+      "scenario_tags": [
+        "M1"
+      ],
+      "actor": "IC",
+      "action": "Approved leverage cap: 10x -> 3x on new positions.",
+      "rationale": "Slow future cascade size while liquidations remain market-explained.",
+      "signal_snapshot": {
+        "LIQ_RATE": 140.0,
+        "LAR": 1.1
+      },
+      "liquidation_review": null,
+      "approved_by": "IC",
+      "expires_at": null,
+      "ref": "a3"
+    },
+    {
+      "id": 11,
+      "t": 855,
+      "t_label": "T+14:15",
+      "type": "decision",
+      "sev": 2,
+      "scenario_tags": [
+        "M1",
+        "I1",
+        "M2"
+      ],
+      "actor": "IC",
+      "action": "Proposed reduce-only on BTC-PERP, ETH-PERP.",
+      "rationale": "Insurance fund at 40% and falling ~4%/min; LIQ_RATE 410/min.",
+      "signal_snapshot": {
+        "INS_FUND_PCT": 40.0,
+        "LIQ_RATE": 410.0
+      },
+      "liquidation_review": null,
+      "approved_by": null,
+      "expires_at": null,
+      "ref": "a4"
+    },
+    {
+      "id": 12,
+      "t": 1080,
+      "t_label": "T+18:00",
+      "type": "decision",
+      "sev": 2,
+      "scenario_tags": [
+        "M1",
+        "I1",
+        "M2"
+      ],
+      "actor": "IC",
+      "action": "Approved reduce-only on BTC-PERP, ETH-PERP.",
+      "rationale": "Forecast shows P(SEV-1 in 15m) 68% -> 21% with this control; act before the fund crosses 25%.",
+      "signal_snapshot": {
+        "INS_FUND_PCT": 39.0,
+        "LIQ_RATE": 398.0
+      },
+      "liquidation_review": null,
+      "approved_by": "IC",
+      "expires_at": null,
+      "ref": "a4"
+    },
+    {
+      "id": 14,
+      "t": 1095,
+      "t_label": "T+18:15",
+      "type": "decision",
+      "sev": 2,
+      "scenario_tags": [
+        "M1",
+        "I1",
+        "M2"
+      ],
+      "actor": "TL",
+      "action": "Confirmed liquidation engine is not over-firing (ruled out P1).",
+      "rationale": "LAR steady at 1.1 through the cascade; matches the price move.",
+      "signal_snapshot": {
+        "LAR": 1.1
+      },
+      "liquidation_review": "market-explained",
+      "approved_by": "TL",
+      "expires_at": null,
+      "ref": "a5"
+    },
+    {
+      "id": 17,
+      "t": 2415,
+      "t_label": "T+40:15",
+      "type": "decision",
+      "sev": 2,
+      "scenario_tags": [
+        "M1",
+        "I1",
+        "M2"
+      ],
+      "actor": "IC",
+      "action": "Confirmed step-down: CRITICAL -> STABILISING.",
+      "rationale": "Score has held below the Warning band for 5+ minutes; fund recovering.",
+      "signal_snapshot": {
+        "LIQ_RATE": 56.0,
+        "INS_FUND_PCT": 46.0
+      },
+      "liquidation_review": null,
+      "approved_by": "IC",
+      "expires_at": null,
+      "ref": null
+    },
+    {
+      "id": 19,
+      "t": 3280,
+      "t_label": "T+54:40",
+      "type": "decision",
+      "sev": 4,
+      "scenario_tags": [
+        "M1",
+        "I1",
+        "M2"
+      ],
+      "actor": "IC",
+      "action": "Lifted reduce-only mode.",
+      "rationale": "All signals below warn for 15+ minutes; fund stable at 61%.",
+      "signal_snapshot": {
+        "INS_FUND_PCT": 61.0,
+        "LIQ_RATE": 6.0
+      },
+      "liquidation_review": null,
+      "approved_by": "IC",
+      "expires_at": null,
+      "ref": "a4"
+    },
+    {
+      "id": 20,
+      "t": 3290,
+      "t_label": "T+54:50",
+      "type": "decision",
+      "sev": 4,
+      "scenario_tags": [
+        "M1",
+        "I1",
+        "M2"
+      ],
+      "actor": "IC",
+      "action": "Confirmed resolution: STABILISING -> RESOLVED.",
+      "rationale": "All signals normal for 15+ minutes; no open liquidation disputes.",
+      "signal_snapshot": {},
+      "liquidation_review": null,
+      "approved_by": "IC",
+      "expires_at": null,
+      "ref": null
+    }
+  ],
+  "comms": [
+    {
+      "id": 6,
+      "t": 95,
+      "t_label": "T+01:35",
+      "type": "comm",
+      "sev": 3,
+      "scenario_tags": [
+        "M1"
+      ],
+      "actor": "CS",
+      "action": "Sent T1 volatility notice (in-app banner).",
+      "rationale": null,
+      "signal_snapshot": {
+        "PX_CHG_5M": -6.2
+      },
+      "liquidation_review": null,
+      "approved_by": "CS",
+      "expires_at": null,
+      "ref": "t1"
+    },
+    {
+      "id": 8,
+      "t": 380,
+      "t_label": "T+06:20",
+      "type": "comm",
+      "sev": 3,
+      "scenario_tags": [
+        "M1",
+        "I1"
+      ],
+      "actor": "CS",
+      "action": "Sent T11 support FAQ (top-3 answers) to queue.",
+      "rationale": null,
+      "signal_snapshot": {
+        "TICKET_RATE": 4.1
+      },
+      "liquidation_review": null,
+      "approved_by": "CS",
+      "expires_at": null,
+      "ref": "t11"
+    },
+    {
+      "id": 13,
+      "t": 1090,
+      "t_label": "T+18:10",
+      "type": "comm",
+      "sev": 2,
+      "scenario_tags": [
+        "M1",
+        "I1",
+        "M2"
+      ],
+      "actor": "CS",
+      "action": "Sent T3 reduce-only notice.",
+      "rationale": null,
+      "signal_snapshot": {
+        "INS_FUND_PCT": 39.0
+      },
+      "liquidation_review": null,
+      "approved_by": "CS",
+      "expires_at": null,
+      "ref": "t3"
+    },
+    {
+      "id": 22,
+      "t": 3300,
+      "t_label": "T+55:00",
+      "type": "comm",
+      "sev": 4,
+      "scenario_tags": [
+        "M1",
+        "I1",
+        "M2"
+      ],
+      "actor": "CS",
+      "action": "Sent T12 resolution notice.",
+      "rationale": null,
+      "signal_snapshot": {},
+      "liquidation_review": null,
+      "approved_by": "CS",
+      "expires_at": null,
+      "ref": "t12"
+    }
+  ],
+  "liquidation_reviews": [
+    {
+      "id": 3,
+      "t": 20,
+      "t_label": "T+00:20",
+      "type": "decision",
+      "sev": 3,
+      "scenario_tags": [
+        "M1"
+      ],
+      "actor": "IC",
+      "action": "Acknowledged Warning alert.",
+      "rationale": "Confirmed sharp move on the primary book; LAR 1.1, nominal.",
+      "signal_snapshot": {
+        "PX_CHG_5M": -6.1,
+        "LIQ_RATE": 102.0,
+        "LAR": 1.1
+      },
+      "liquidation_review": "market-explained",
+      "approved_by": "IC",
+      "expires_at": null,
+      "ref": "a1"
+    },
+    {
+      "id": 14,
+      "t": 1095,
+      "t_label": "T+18:15",
+      "type": "decision",
+      "sev": 2,
+      "scenario_tags": [
+        "M1",
+        "I1",
+        "M2"
+      ],
+      "actor": "TL",
+      "action": "Confirmed liquidation engine is not over-firing (ruled out P1).",
+      "rationale": "LAR steady at 1.1 through the cascade; matches the price move.",
+      "signal_snapshot": {
+        "LAR": 1.1
+      },
+      "liquidation_review": "market-explained",
+      "approved_by": "TL",
+      "expires_at": null,
+      "ref": "a5"
+    }
+  ],
+  "open_items": [
+    "Compensation review: none needed \u2014 liquidations market-explained throughout."
+  ],
+  "markdown": "# Incident Summary \u2014 C1 \"Black Tuesday\"\n\n**Scenario:** C1 \u00b7 **Started:** T-01:00 \u00b7 **Ended:** T+55:00 \u00b7 **Peak severity:** SEV-2 Critical\n\n## Timeline\n- T-01:00 \u2014 Incident timer started for scenario C1 'Black Tuesday'.\n- T+00:00 \u2014 NORMAL -> WARNING (PX_CHG_5M -6.1%, LIQ_RATE 102/min).\n- T+14:10 \u2014 WARNING -> CRITICAL (LIQ_RATE 405/min, INS_FUND_PCT 41%).\n- T+40:20 \u2014 CRITICAL -> STABILISING.\n- T+54:55 \u2014 STABILISING -> RESOLVED.\n\n## Peaks\n- LIQ_RATE: 410.0 at T+14:32\n- INS_FUND_PCT: 38.0 at T+15:00\n- PX_CHG_5M: -9.8 at T+14:10\n- TICKET_RATE: 4.3 at T+14:32\n- LAR: 1.2 at T+15:00\n\n## Decisions\n- T+00:20 (IC): Acknowledged Warning alert. \u2014 Confirmed sharp move on the primary book; LAR 1.1, nominal.\n- T+00:45 (TL): Confirmed price feed and liquidation engine healthy. \u2014 ORACLE_AGE 1s, API_ERR_PCT 0.3%, no engine errors.\n- T+01:30 (IC): Approved leverage cap: 10x -> 3x on new positions. \u2014 Slow future cascade size while liquidations remain market-explained.\n- T+14:15 (IC): Proposed reduce-only on BTC-PERP, ETH-PERP. \u2014 Insurance fund at 40% and falling ~4%/min; LIQ_RATE 410/min.\n- T+18:00 (IC): Approved reduce-only on BTC-PERP, ETH-PERP. \u2014 Forecast shows P(SEV-1 in 15m) 68% -> 21% with this control; act before the fund crosses 25%.\n- T+18:15 (TL): Confirmed liquidation engine is not over-firing (ruled out P1). \u2014 LAR steady at 1.1 through the cascade; matches the price move.\n- T+40:15 (IC): Confirmed step-down: CRITICAL -> STABILISING. \u2014 Score has held below the Warning band for 5+ minutes; fund recovering.\n- T+54:40 (IC): Lifted reduce-only mode. \u2014 All signals below warn for 15+ minutes; fund stable at 61%.\n- T+54:50 (IC): Confirmed resolution: STABILISING -> RESOLVED. \u2014 All signals normal for 15+ minutes; no open liquidation disputes.\n\n## Comms sent\n- T+01:35 (CS): Sent T1 volatility notice (in-app banner).\n- T+06:20 (CS): Sent T11 support FAQ (top-3 answers) to queue.\n- T+18:10 (CS): Sent T3 reduce-only notice.\n- T+55:00 (CS): Sent T12 resolution notice.\n\n## Liquidation reviews\n- T+00:20: market-explained\n- T+18:15: market-explained\n\n## Open items\n- Compensation review: none needed \u2014 liquidations market-explained throughout.\n"
+}
