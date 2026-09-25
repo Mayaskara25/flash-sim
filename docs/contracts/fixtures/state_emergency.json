@@ -1,0 +1,2407 @@
+{
+  "sim": {
+    "scenario_id": "C1",
+    "scenario_name": "Black Tuesday",
+    "t": 1440,
+    "t_label": "T+24:00",
+    "speed": 8.0,
+    "running": true,
+    "duration_s": 3600,
+    "started": true
+  },
+  "severity": {
+    "state": "EMERGENCY",
+    "sev": 1,
+    "score": 73.0,
+    "dims": {
+      "F": 4.0,
+      "B": 5.0,
+      "A": 2.0,
+      "V": 4.0,
+      "R": 2.0
+    },
+    "overrides": [
+      "Insurance fund below 25% of its starting balance"
+    ],
+    "since_t": 1400,
+    "pending": null
+  },
+  "classifier": {
+    "verdict": "MARKET",
+    "lar": 1.2,
+    "l_obs": 58.0,
+    "l_exp": 48.0,
+    "explanation": "Still market-explained (LAR 1.2), but the insurance fund has crossed the SEV-1 override regardless of cause."
+  },
+  "tags": [
+    {
+      "tag": "M1",
+      "name": "Directional flash crash",
+      "active": true,
+      "first_t": 0,
+      "peak_sev": 1
+    },
+    {
+      "tag": "I1",
+      "name": "Customer panic / information cascade",
+      "active": true,
+      "first_t": 360,
+      "peak_sev": 1
+    },
+    {
+      "tag": "M2",
+      "name": "Liquidation cascade drains insurance fund",
+      "active": true,
+      "first_t": 840,
+      "peak_sev": 1
+    }
+  ],
+  "signals": [
+    {
+      "code": "PX_CHG_5M",
+      "label": "Underlying price change (5m)",
+      "unit": "%",
+      "value": -11.4,
+      "status": "critical",
+      "relevant": true,
+      "trend_per_min": -0.1586,
+      "history": [
+        [
+          840,
+          -9.814
+        ],
+        [
+          866,
+          -9.8358
+        ],
+        [
+          892,
+          -9.8908
+        ],
+        [
+          918,
+          -10.0674
+        ],
+        [
+          944,
+          -10.0828
+        ],
+        [
+          970,
+          -10.2063
+        ],
+        [
+          997,
+          -10.2737
+        ],
+        [
+          1023,
+          -10.3466
+        ],
+        [
+          1049,
+          -10.3458
+        ],
+        [
+          1075,
+          -10.4425
+        ],
+        [
+          1101,
+          -10.5023
+        ],
+        [
+          1127,
+          -10.5125
+        ],
+        [
+          1153,
+          -10.5755
+        ],
+        [
+          1179,
+          -10.663
+        ],
+        [
+          1205,
+          -10.7421
+        ],
+        [
+          1231,
+          -10.8387
+        ],
+        [
+          1257,
+          -10.944
+        ],
+        [
+          1283,
+          -11.0335
+        ],
+        [
+          1310,
+          -11.0058
+        ],
+        [
+          1336,
+          -11.1777
+        ],
+        [
+          1362,
+          -11.1343
+        ],
+        [
+          1388,
+          -11.2209
+        ],
+        [
+          1414,
+          -11.3128
+        ],
+        [
+          1440,
+          -11.4
+        ]
+      ],
+      "thresholds": {
+        "watch": -2.0,
+        "warn": -5.0,
+        "critical": -10.0
+      },
+      "direction": "down"
+    },
+    {
+      "code": "LIQ_RATE",
+      "label": "Liquidation rate",
+      "unit": "/min",
+      "value": 520.0,
+      "status": "critical",
+      "relevant": true,
+      "trend_per_min": 11.3845,
+      "history": [
+        [
+          840,
+          406.155
+        ],
+        [
+          866,
+          412.5804
+        ],
+        [
+          892,
+          416.6762
+        ],
+        [
+          918,
+          420.6253
+        ],
+        [
+          944,
+          425.6059
+        ],
+        [
+          970,
+          435.8996
+        ],
+        [
+          997,
+          439.7864
+        ],
+        [
+          1023,
+          444.8816
+        ],
+        [
+          1049,
+          445.3907
+        ],
+        [
+          1075,
+          450.6734
+        ],
+        [
+          1101,
+          454.6702
+        ],
+        [
+          1127,
+          462.5161
+        ],
+        [
+          1153,
+          463.9613
+        ],
+        [
+          1179,
+          469.6526
+        ],
+        [
+          1205,
+          473.8172
+        ],
+        [
+          1231,
+          482.4
+        ],
+        [
+          1257,
+          482.8417
+        ],
+        [
+          1283,
+          495.4402
+        ],
+        [
+          1310,
+          498.909
+        ],
+        [
+          1336,
+          501.3169
+        ],
+        [
+          1362,
+          506.243
+        ],
+        [
+          1388,
+          513.8993
+        ],
+        [
+          1414,
+          517.8331
+        ],
+        [
+          1440,
+          520.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 30.0,
+        "warn": 100.0,
+        "critical": 300.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "INS_FUND_PCT",
+      "label": "Insurance fund (% of start)",
+      "unit": "%",
+      "value": 22.0,
+      "status": "critical",
+      "relevant": true,
+      "trend_per_min": -1.7469,
+      "history": [
+        [
+          840,
+          39.469
+        ],
+        [
+          866,
+          38.9744
+        ],
+        [
+          892,
+          38.7961
+        ],
+        [
+          918,
+          37.9906
+        ],
+        [
+          944,
+          36.5769
+        ],
+        [
+          970,
+          36.0819
+        ],
+        [
+          997,
+          35.216
+        ],
+        [
+          1023,
+          34.8778
+        ],
+        [
+          1049,
+          33.3505
+        ],
+        [
+          1075,
+          32.7723
+        ],
+        [
+          1101,
+          32.7595
+        ],
+        [
+          1127,
+          30.8678
+        ],
+        [
+          1153,
+          30.6696
+        ],
+        [
+          1179,
+          29.7705
+        ],
+        [
+          1205,
+          28.5309
+        ],
+        [
+          1231,
+          27.5998
+        ],
+        [
+          1257,
+          27.1495
+        ],
+        [
+          1283,
+          27.2489
+        ],
+        [
+          1310,
+          25.8842
+        ],
+        [
+          1336,
+          25.3601
+        ],
+        [
+          1362,
+          24.9889
+        ],
+        [
+          1388,
+          23.0091
+        ],
+        [
+          1414,
+          22.7057
+        ],
+        [
+          1440,
+          22.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 90.0,
+        "warn": 60.0,
+        "critical": 25.0
+      },
+      "direction": "down"
+    },
+    {
+      "code": "BAD_DEBT_RATE",
+      "label": "Bad debt rate",
+      "unit": "%fund/min",
+      "value": 1.35,
+      "status": "warn",
+      "relevant": true,
+      "trend_per_min": 0.0962,
+      "history": [
+        [
+          840,
+          0.3881
+        ],
+        [
+          866,
+          0.4669
+        ],
+        [
+          892,
+          0.5203
+        ],
+        [
+          918,
+          0.5159
+        ],
+        [
+          944,
+          0.6199
+        ],
+        [
+          970,
+          0.638
+        ],
+        [
+          997,
+          0.6797
+        ],
+        [
+          1023,
+          0.7385
+        ],
+        [
+          1049,
+          0.7622
+        ],
+        [
+          1075,
+          0.8171
+        ],
+        [
+          1101,
+          0.798
+        ],
+        [
+          1127,
+          0.8849
+        ],
+        [
+          1153,
+          0.924
+        ],
+        [
+          1179,
+          0.9309
+        ],
+        [
+          1205,
+          1.0091
+        ],
+        [
+          1231,
+          1.0126
+        ],
+        [
+          1257,
+          1.0679
+        ],
+        [
+          1283,
+          1.1135
+        ],
+        [
+          1310,
+          1.1378
+        ],
+        [
+          1336,
+          1.184
+        ],
+        [
+          1362,
+          1.2583
+        ],
+        [
+          1388,
+          1.2697
+        ],
+        [
+          1414,
+          1.3004
+        ],
+        [
+          1440,
+          1.35
+        ]
+      ],
+      "thresholds": {
+        "watch": 0.01,
+        "warn": 0.01,
+        "critical": 2.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "ADL_COUNT",
+      "label": "Auto-deleverage events",
+      "unit": "count",
+      "value": 0.0,
+      "status": "normal",
+      "relevant": true,
+      "trend_per_min": -0.0,
+      "history": [
+        [
+          840,
+          0.0003
+        ],
+        [
+          866,
+          -0.0003
+        ],
+        [
+          892,
+          0.0003
+        ],
+        [
+          918,
+          -0.0001
+        ],
+        [
+          944,
+          0.0007
+        ],
+        [
+          970,
+          0.0006
+        ],
+        [
+          997,
+          0.0002
+        ],
+        [
+          1023,
+          -0.0005
+        ],
+        [
+          1049,
+          0.0004
+        ],
+        [
+          1075,
+          -0.0003
+        ],
+        [
+          1101,
+          0.0008
+        ],
+        [
+          1127,
+          0.0003
+        ],
+        [
+          1153,
+          -0.0006
+        ],
+        [
+          1179,
+          -0.0003
+        ],
+        [
+          1205,
+          -0.001
+        ],
+        [
+          1231,
+          -0.0004
+        ],
+        [
+          1257,
+          -0.0005
+        ],
+        [
+          1283,
+          0.0002
+        ],
+        [
+          1310,
+          0.0004
+        ],
+        [
+          1336,
+          0.0
+        ],
+        [
+          1362,
+          -0.0004
+        ],
+        [
+          1388,
+          -0.0
+        ],
+        [
+          1414,
+          0.0003
+        ],
+        [
+          1440,
+          0.0
+        ]
+      ],
+      "thresholds": {
+        "watch": null,
+        "warn": null,
+        "critical": 1.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "NEG_BAL_ACCTS",
+      "label": "Negative-balance accounts",
+      "unit": "count",
+      "value": 4.0,
+      "status": "warn",
+      "relevant": true,
+      "trend_per_min": 0.1994,
+      "history": [
+        [
+          840,
+          2.0057
+        ],
+        [
+          866,
+          2.0401
+        ],
+        [
+          892,
+          2.2124
+        ],
+        [
+          918,
+          2.2514
+        ],
+        [
+          944,
+          2.3281
+        ],
+        [
+          970,
+          2.4867
+        ],
+        [
+          997,
+          2.5427
+        ],
+        [
+          1023,
+          2.6046
+        ],
+        [
+          1049,
+          2.6597
+        ],
+        [
+          1075,
+          2.7978
+        ],
+        [
+          1101,
+          2.9423
+        ],
+        [
+          1127,
+          3.0336
+        ],
+        [
+          1153,
+          2.9799
+        ],
+        [
+          1179,
+          3.1293
+        ],
+        [
+          1205,
+          3.2522
+        ],
+        [
+          1231,
+          3.305
+        ],
+        [
+          1257,
+          3.4267
+        ],
+        [
+          1283,
+          3.5024
+        ],
+        [
+          1310,
+          3.6207
+        ],
+        [
+          1336,
+          3.7249
+        ],
+        [
+          1362,
+          3.7111
+        ],
+        [
+          1388,
+          3.8954
+        ],
+        [
+          1414,
+          3.9778
+        ],
+        [
+          1440,
+          4.0
+        ]
+      ],
+      "thresholds": {
+        "watch": null,
+        "warn": 1.0,
+        "critical": 50.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "NET_EXPOSURE_PCT",
+      "label": "Net exposure (% of limit)",
+      "unit": "% of limit",
+      "value": 58.0,
+      "status": "watch",
+      "relevant": true,
+      "trend_per_min": 1.1781,
+      "history": [
+        [
+          840,
+          46.2191
+        ],
+        [
+          866,
+          46.6049
+        ],
+        [
+          892,
+          47.3498
+        ],
+        [
+          918,
+          47.6432
+        ],
+        [
+          944,
+          48.5133
+        ],
+        [
+          970,
+          49.0537
+        ],
+        [
+          997,
+          49.4508
+        ],
+        [
+          1023,
+          49.9721
+        ],
+        [
+          1049,
+          50.3766
+        ],
+        [
+          1075,
+          50.7812
+        ],
+        [
+          1101,
+          50.8375
+        ],
+        [
+          1127,
+          51.917
+        ],
+        [
+          1153,
+          52.7005
+        ],
+        [
+          1179,
+          52.7142
+        ],
+        [
+          1205,
+          53.0897
+        ],
+        [
+          1231,
+          53.4531
+        ],
+        [
+          1257,
+          54.5719
+        ],
+        [
+          1283,
+          54.8905
+        ],
+        [
+          1310,
+          55.1226
+        ],
+        [
+          1336,
+          56.2208
+        ],
+        [
+          1362,
+          56.5955
+        ],
+        [
+          1388,
+          57.0662
+        ],
+        [
+          1414,
+          57.1514
+        ],
+        [
+          1440,
+          58.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 50.0,
+        "warn": 70.0,
+        "critical": 100.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "TICKET_RATE",
+      "label": "Support ticket rate",
+      "unit": "\u00d7 baseline",
+      "value": 5.6,
+      "status": "warn",
+      "relevant": true,
+      "trend_per_min": 0.1322,
+      "history": [
+        [
+          840,
+          4.2779
+        ],
+        [
+          866,
+          4.325
+        ],
+        [
+          892,
+          4.4077
+        ],
+        [
+          918,
+          4.4549
+        ],
+        [
+          944,
+          4.543
+        ],
+        [
+          970,
+          4.5676
+        ],
+        [
+          997,
+          4.6509
+        ],
+        [
+          1023,
+          4.7251
+        ],
+        [
+          1049,
+          4.7189
+        ],
+        [
+          1075,
+          4.7748
+        ],
+        [
+          1101,
+          4.9017
+        ],
+        [
+          1127,
+          4.9538
+        ],
+        [
+          1153,
+          4.9473
+        ],
+        [
+          1179,
+          5.001
+        ],
+        [
+          1205,
+          5.09
+        ],
+        [
+          1231,
+          5.1562
+        ],
+        [
+          1257,
+          5.154
+        ],
+        [
+          1283,
+          5.2868
+        ],
+        [
+          1310,
+          5.2697
+        ],
+        [
+          1336,
+          5.3885
+        ],
+        [
+          1362,
+          5.3792
+        ],
+        [
+          1388,
+          5.515
+        ],
+        [
+          1414,
+          5.5853
+        ],
+        [
+          1440,
+          5.6
+        ]
+      ],
+      "thresholds": {
+        "watch": 2.0,
+        "warn": 3.0,
+        "critical": 8.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "SENTIMENT",
+      "label": "Social sentiment",
+      "unit": "\u22121\u2026+1",
+      "value": -0.5,
+      "status": "warn",
+      "relevant": true,
+      "trend_per_min": -0.0122,
+      "history": [
+        [
+          840,
+          -0.3782
+        ],
+        [
+          866,
+          -0.388
+        ],
+        [
+          892,
+          -0.3956
+        ],
+        [
+          918,
+          -0.4002
+        ],
+        [
+          944,
+          -0.4039
+        ],
+        [
+          970,
+          -0.4056
+        ],
+        [
+          997,
+          -0.4078
+        ],
+        [
+          1023,
+          -0.416
+        ],
+        [
+          1049,
+          -0.4228
+        ],
+        [
+          1075,
+          -0.4315
+        ],
+        [
+          1101,
+          -0.4366
+        ],
+        [
+          1127,
+          -0.4405
+        ],
+        [
+          1153,
+          -0.4483
+        ],
+        [
+          1179,
+          -0.45
+        ],
+        [
+          1205,
+          -0.4561
+        ],
+        [
+          1231,
+          -0.4595
+        ],
+        [
+          1257,
+          -0.4621
+        ],
+        [
+          1283,
+          -0.4678
+        ],
+        [
+          1310,
+          -0.4705
+        ],
+        [
+          1336,
+          -0.4766
+        ],
+        [
+          1362,
+          -0.4879
+        ],
+        [
+          1388,
+          -0.488
+        ],
+        [
+          1414,
+          -0.4916
+        ],
+        [
+          1440,
+          -0.5
+        ]
+      ],
+      "thresholds": {
+        "watch": -0.2,
+        "warn": -0.4,
+        "critical": -0.7
+      },
+      "direction": "down"
+    },
+    {
+      "code": "RUMOR_MENTIONS",
+      "label": "Rumor mentions",
+      "unit": "/min",
+      "value": 9.0,
+      "status": "watch",
+      "relevant": true,
+      "trend_per_min": 0.5826,
+      "history": [
+        [
+          840,
+          3.1745
+        ],
+        [
+          866,
+          3.2664
+        ],
+        [
+          892,
+          3.4095
+        ],
+        [
+          918,
+          3.6309
+        ],
+        [
+          944,
+          3.9331
+        ],
+        [
+          970,
+          4.5425
+        ],
+        [
+          997,
+          4.4429
+        ],
+        [
+          1023,
+          4.7112
+        ],
+        [
+          1049,
+          5.0049
+        ],
+        [
+          1075,
+          5.2546
+        ],
+        [
+          1101,
+          5.7346
+        ],
+        [
+          1127,
+          6.0904
+        ],
+        [
+          1153,
+          6.0422
+        ],
+        [
+          1179,
+          6.5174
+        ],
+        [
+          1205,
+          6.5301
+        ],
+        [
+          1231,
+          6.9131
+        ],
+        [
+          1257,
+          7.1119
+        ],
+        [
+          1283,
+          7.314
+        ],
+        [
+          1310,
+          7.8358
+        ],
+        [
+          1336,
+          7.804
+        ],
+        [
+          1362,
+          8.395
+        ],
+        [
+          1388,
+          8.4143
+        ],
+        [
+          1414,
+          8.635
+        ],
+        [
+          1440,
+          9.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 5.0,
+        "warn": 20.0,
+        "critical": 60.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "LAR",
+      "label": "Liquidation anomaly ratio",
+      "unit": "ratio",
+      "value": 1.2,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": 0.0104,
+      "history": [
+        [
+          840,
+          1.0963
+        ],
+        [
+          926,
+          1.1189
+        ],
+        [
+          1011,
+          1.1283
+        ],
+        [
+          1097,
+          1.1385
+        ],
+        [
+          1183,
+          1.1531
+        ],
+        [
+          1269,
+          1.1735
+        ],
+        [
+          1354,
+          1.1847
+        ],
+        [
+          1440,
+          1.2
+        ]
+      ],
+      "thresholds": {
+        "watch": 1.5,
+        "warn": 2.0,
+        "critical": 3.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "ORACLE_DEV",
+      "label": "Oracle deviation",
+      "unit": "%",
+      "value": 0.05,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0001,
+      "history": [
+        [
+          840,
+          0.0509
+        ],
+        [
+          926,
+          0.0506
+        ],
+        [
+          1011,
+          0.0495
+        ],
+        [
+          1097,
+          0.0499
+        ],
+        [
+          1183,
+          0.0503
+        ],
+        [
+          1269,
+          0.0501
+        ],
+        [
+          1354,
+          0.0498
+        ],
+        [
+          1440,
+          0.05
+        ]
+      ],
+      "thresholds": {
+        "watch": 0.3,
+        "warn": 0.5,
+        "critical": 1.5
+      },
+      "direction": "up"
+    },
+    {
+      "code": "ORACLE_AGE",
+      "label": "Oracle age",
+      "unit": "s",
+      "value": 1.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": 0.0,
+      "history": [
+        [
+          840,
+          0.9998
+        ],
+        [
+          926,
+          0.9996
+        ],
+        [
+          1011,
+          1.0
+        ],
+        [
+          1097,
+          1.0007
+        ],
+        [
+          1183,
+          0.9998
+        ],
+        [
+          1269,
+          0.9997
+        ],
+        [
+          1354,
+          0.9993
+        ],
+        [
+          1440,
+          1.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 3.0,
+        "warn": 5.0,
+        "critical": 15.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "STBL_PX",
+      "label": "Stablecoin price",
+      "unit": "USD",
+      "value": 1.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0,
+      "history": [
+        [
+          840,
+          1.0005
+        ],
+        [
+          926,
+          0.9995
+        ],
+        [
+          1011,
+          1.0004
+        ],
+        [
+          1097,
+          1.0006
+        ],
+        [
+          1183,
+          1.0001
+        ],
+        [
+          1269,
+          1.0004
+        ],
+        [
+          1354,
+          0.9998
+        ],
+        [
+          1440,
+          1.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 0.995,
+        "warn": 0.985,
+        "critical": 0.97
+      },
+      "direction": "down"
+    },
+    {
+      "code": "SETTLE_FAIL_PCT",
+      "label": "Settlement failure rate",
+      "unit": "%",
+      "value": 0.2,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": 0.0,
+      "history": [
+        [
+          840,
+          0.1999
+        ],
+        [
+          926,
+          0.1995
+        ],
+        [
+          1011,
+          0.2002
+        ],
+        [
+          1097,
+          0.1995
+        ],
+        [
+          1183,
+          0.2007
+        ],
+        [
+          1269,
+          0.1999
+        ],
+        [
+          1354,
+          0.2002
+        ],
+        [
+          1440,
+          0.2
+        ]
+      ],
+      "thresholds": {
+        "watch": 1.0,
+        "warn": 2.0,
+        "critical": 10.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "LP_REJECT_PCT",
+      "label": "LP reject rate",
+      "unit": "%",
+      "value": 0.5,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": 0.0001,
+      "history": [
+        [
+          840,
+          0.4995
+        ],
+        [
+          926,
+          0.5008
+        ],
+        [
+          1011,
+          0.4999
+        ],
+        [
+          1097,
+          0.4993
+        ],
+        [
+          1183,
+          0.4999
+        ],
+        [
+          1269,
+          0.4995
+        ],
+        [
+          1354,
+          0.4998
+        ],
+        [
+          1440,
+          0.5
+        ]
+      ],
+      "thresholds": {
+        "watch": 2.0,
+        "warn": 5.0,
+        "critical": 20.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "WDR_QUEUE_RATIO",
+      "label": "Withdrawal queue ratio",
+      "unit": "%",
+      "value": 5.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0,
+      "history": [
+        [
+          840,
+          5.0001
+        ],
+        [
+          926,
+          4.9998
+        ],
+        [
+          1011,
+          4.9996
+        ],
+        [
+          1097,
+          5.0004
+        ],
+        [
+          1183,
+          5.0003
+        ],
+        [
+          1269,
+          5.001
+        ],
+        [
+          1354,
+          5.0005
+        ],
+        [
+          1440,
+          5.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 25.0,
+        "warn": 50.0,
+        "critical": 90.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "INR_BASIS_PCT",
+      "label": "INR/USDT basis",
+      "unit": "%",
+      "value": 0.2,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": 0.0,
+      "history": [
+        [
+          840,
+          0.1996
+        ],
+        [
+          926,
+          0.1994
+        ],
+        [
+          1011,
+          0.1999
+        ],
+        [
+          1097,
+          0.1996
+        ],
+        [
+          1183,
+          0.2006
+        ],
+        [
+          1269,
+          0.201
+        ],
+        [
+          1354,
+          0.1998
+        ],
+        [
+          1440,
+          0.2
+        ]
+      ],
+      "thresholds": {
+        "watch": 0.5,
+        "warn": 1.0,
+        "critical": 3.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "ORDER_LATENCY_P95",
+      "label": "Order latency p95",
+      "unit": "ms",
+      "value": 80.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": 0.0,
+      "history": [
+        [
+          840,
+          79.9996
+        ],
+        [
+          926,
+          79.9995
+        ],
+        [
+          1011,
+          80.0002
+        ],
+        [
+          1097,
+          80.0002
+        ],
+        [
+          1183,
+          79.9994
+        ],
+        [
+          1269,
+          79.9998
+        ],
+        [
+          1354,
+          80.0008
+        ],
+        [
+          1440,
+          80.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 400.0,
+        "warn": 1000.0,
+        "critical": 5000.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "API_ERR_PCT",
+      "label": "API error rate",
+      "unit": "%",
+      "value": 0.3,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": 0.0,
+      "history": [
+        [
+          840,
+          0.2996
+        ],
+        [
+          926,
+          0.3005
+        ],
+        [
+          1011,
+          0.2991
+        ],
+        [
+          1097,
+          0.3006
+        ],
+        [
+          1183,
+          0.3005
+        ],
+        [
+          1269,
+          0.2996
+        ],
+        [
+          1354,
+          0.299
+        ],
+        [
+          1440,
+          0.3
+        ]
+      ],
+      "thresholds": {
+        "watch": 1.0,
+        "warn": 2.0,
+        "critical": 10.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "UPI_FAIL_PCT",
+      "label": "UPI failure rate",
+      "unit": "%",
+      "value": 1.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0,
+      "history": [
+        [
+          840,
+          1.0003
+        ],
+        [
+          926,
+          0.9999
+        ],
+        [
+          1011,
+          0.999
+        ],
+        [
+          1097,
+          1.0008
+        ],
+        [
+          1183,
+          1.0008
+        ],
+        [
+          1269,
+          1.0006
+        ],
+        [
+          1354,
+          0.999
+        ],
+        [
+          1440,
+          1.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 3.0,
+        "warn": 5.0,
+        "critical": 25.0
+      },
+      "direction": "up"
+    }
+  ],
+  "alerts": [
+    {
+      "id": "al-px-warn",
+      "signal": "PX_CHG_5M",
+      "level": "warn",
+      "count": 14,
+      "first_t": 0,
+      "last_t": 1400,
+      "acknowledged_by": "IC"
+    },
+    {
+      "id": "al-liq-warn",
+      "signal": "LIQ_RATE",
+      "level": "warn",
+      "count": 6,
+      "first_t": 0,
+      "last_t": 130,
+      "acknowledged_by": "IC"
+    },
+    {
+      "id": "al-liq-crit",
+      "signal": "LIQ_RATE",
+      "level": "critical",
+      "count": 10,
+      "first_t": 700,
+      "last_t": 1440,
+      "acknowledged_by": null
+    },
+    {
+      "id": "al-fund-warn",
+      "signal": "INS_FUND_PCT",
+      "level": "warn",
+      "count": 5,
+      "first_t": 780,
+      "last_t": 1300,
+      "acknowledged_by": null
+    },
+    {
+      "id": "al-fund-crit",
+      "signal": "INS_FUND_PCT",
+      "level": "critical",
+      "count": 3,
+      "first_t": 1300,
+      "last_t": 1440,
+      "acknowledged_by": null
+    },
+    {
+      "id": "al-ticket-warn",
+      "signal": "TICKET_RATE",
+      "level": "warn",
+      "count": 5,
+      "first_t": 360,
+      "last_t": 1400,
+      "acknowledged_by": "CS"
+    }
+  ],
+  "actions": [
+    {
+      "id": "a1",
+      "tag": "M1",
+      "role": "IC",
+      "text": "Acknowledge Warning alert",
+      "priority": 1,
+      "control_id": null,
+      "template_id": null,
+      "status": "done",
+      "proposed_t": 0,
+      "decided_t": 20,
+      "decided_by": "IC",
+      "rationale": "Confirmed sharp move on the primary book; LAR 1.1, nominal.",
+      "rationale_hint": "PX_CHG_5M -6.1%, LIQ_RATE 102/min \u2014 confirm and check LAR.",
+      "expires_t": null,
+      "what_if": null
+    },
+    {
+      "id": "a2",
+      "tag": null,
+      "role": "TL",
+      "text": "Confirm price feed and liquidation engine health",
+      "priority": 2,
+      "control_id": null,
+      "template_id": null,
+      "status": "done",
+      "proposed_t": 0,
+      "decided_t": 45,
+      "decided_by": "TL",
+      "rationale": "ORACLE_AGE 1s, API_ERR_PCT 0.3%, no engine errors.",
+      "rationale_hint": "Check ORACLE_AGE, API_ERR_PCT and engine error rate.",
+      "expires_t": null,
+      "what_if": null
+    },
+    {
+      "id": "a3",
+      "tag": "M1",
+      "role": "IC",
+      "text": "Cap max leverage on new positions (10x -> 3x)",
+      "priority": 3,
+      "control_id": "leverage_cap",
+      "template_id": null,
+      "status": "approved",
+      "proposed_t": 20,
+      "decided_t": 90,
+      "decided_by": "IC",
+      "rationale": "Slow future cascade size while liquidations remain market-explained.",
+      "rationale_hint": "LIQ_RATE climbing in line with the move; slow future cascade size.",
+      "expires_t": null,
+      "what_if": null
+    },
+    {
+      "id": "a4",
+      "tag": "M2",
+      "role": "IC",
+      "text": "Switch BTC-PERP, ETH-PERP to reduce-only (no new exposure)",
+      "priority": 1,
+      "control_id": "reduce_only",
+      "template_id": null,
+      "status": "proposed",
+      "proposed_t": 855,
+      "decided_t": null,
+      "decided_by": null,
+      "rationale": null,
+      "rationale_hint": "Insurance fund at 40% and falling ~4%/min; LIQ_RATE 410/min.",
+      "expires_t": null,
+      "what_if": {
+        "control_id": "reduce_only",
+        "p_sev1_15_before": 0.68,
+        "p_sev1_15_after": 0.21,
+        "fund_p50_15_before": 28.0,
+        "fund_p50_15_after": 46.0,
+        "text": "Approving reduce-only drops P(SEV-1 in 15 min) from 68% to 21% and lifts the fund's 15-min median from 28% to 46%."
+      }
+    },
+    {
+      "id": "a5",
+      "tag": "M2",
+      "role": "TL",
+      "text": "Confirm liquidation engine is not over-firing (rule out P1)",
+      "priority": 2,
+      "control_id": null,
+      "template_id": null,
+      "status": "proposed",
+      "proposed_t": 855,
+      "decided_t": null,
+      "decided_by": null,
+      "rationale": null,
+      "rationale_hint": "LAR steady near 0.7-1.5 through the cascade would rule out an engine bug.",
+      "expires_t": null,
+      "what_if": null
+    },
+    {
+      "id": "a9",
+      "tag": "M2",
+      "role": "CS",
+      "text": "Send T3 reduce-only notice (pre-filled)",
+      "priority": 3,
+      "control_id": null,
+      "template_id": "t3",
+      "status": "proposed",
+      "proposed_t": 855,
+      "decided_t": null,
+      "decided_by": null,
+      "rationale": null,
+      "rationale_hint": "Customers need to know before reduce-only affects them.",
+      "expires_t": null,
+      "what_if": null
+    },
+    {
+      "id": "a10",
+      "tag": "M1",
+      "role": "CS",
+      "text": "Send T1 volatility notice (in-app banner)",
+      "priority": 1,
+      "control_id": null,
+      "template_id": "t1",
+      "status": "done",
+      "proposed_t": 0,
+      "decided_t": 95,
+      "decided_by": "CS",
+      "rationale": "Factual volatility notice; no cause named yet.",
+      "rationale_hint": "PX_CHG_5M -6% and falling; give users a heads-up on liquidation risk.",
+      "expires_t": null,
+      "what_if": null
+    },
+    {
+      "id": "a11",
+      "tag": "I1",
+      "role": "CS",
+      "text": "Send T11 support FAQ to queue",
+      "priority": 2,
+      "control_id": null,
+      "template_id": "t11",
+      "status": "done",
+      "proposed_t": 360,
+      "decided_t": 380,
+      "decided_by": "CS",
+      "rationale": null,
+      "rationale_hint": "Ticket volume 4x baseline; give Support the top-3 answers.",
+      "expires_t": null,
+      "what_if": null
+    },
+    {
+      "id": "a6",
+      "tag": null,
+      "role": "IC",
+      "text": "Declare SEV-1 and page founders",
+      "priority": 1,
+      "control_id": null,
+      "template_id": null,
+      "status": "done",
+      "proposed_t": 1400,
+      "decided_t": 1400,
+      "decided_by": "IC",
+      "rationale": "Insurance fund below 25% override; reduce-only was not yet approved.",
+      "rationale_hint": "Insurance fund below the 25% hard override.",
+      "expires_t": null,
+      "what_if": null
+    }
+  ],
+  "templates": [
+    {
+      "id": "t1",
+      "tag": "M1",
+      "audience": "Customer",
+      "channel": "in-app banner",
+      "title": "Volatility notice",
+      "text": "Markets are moving sharply. NVDA-PERP is down 6.2% in the last 5 minutes. MochaTrade systems are operating normally. Leveraged positions carry higher liquidation risk right now; review your margin.",
+      "missing": [],
+      "status": "sent",
+      "surfaced_t": 0,
+      "sent_t": 95,
+      "approved_by": "CS"
+    },
+    {
+      "id": "t2",
+      "tag": null,
+      "audience": "Customer",
+      "channel": "status page",
+      "title": "Status page update",
+      "text": "We are investigating elevated liquidation activity affecting BTC-PERP and ETH-PERP. Your funds remain in your account. Next update by T+30:00.",
+      "missing": [],
+      "status": "sent",
+      "surfaced_t": 850,
+      "sent_t": 860,
+      "approved_by": "CS"
+    },
+    {
+      "id": "t3",
+      "tag": "M2",
+      "audience": "Customer",
+      "channel": "in-app",
+      "title": "Reduce-only notice",
+      "text": "To protect all users during extreme volatility, BTC-PERP and ETH-PERP are in reduce-only mode: you can close or reduce positions but not open new ones. We will lift this once conditions stabilise.",
+      "missing": [],
+      "status": "surfaced",
+      "surfaced_t": 855,
+      "sent_t": null,
+      "approved_by": null
+    },
+    {
+      "id": "t11",
+      "tag": "I1",
+      "audience": "Support",
+      "channel": "canned FAQ",
+      "title": "Top-3 FAQ",
+      "text": "Top-3 answers auto-built from ticket themes: why was I liquidated, can I withdraw, is MochaTrade safe.",
+      "missing": [],
+      "status": "sent",
+      "surfaced_t": 360,
+      "sent_t": 380,
+      "approved_by": "CS"
+    }
+  ],
+  "controls_active": [
+    {
+      "control_id": "leverage_cap",
+      "label": "Max leverage on new positions: 10x -> 3x",
+      "approved_t": 90,
+      "approved_by": "IC",
+      "expires_t": null,
+      "params": {
+        "max_leverage": 3.0
+      }
+    }
+  ],
+  "log": [
+    {
+      "id": 1,
+      "t": -60,
+      "t_label": "T-01:00",
+      "type": "transition",
+      "sev": 4,
+      "scenario_tags": [],
+      "actor": "system",
+      "action": "Incident timer started for scenario C1 'Black Tuesday'.",
+      "rationale": null,
+      "signal_snapshot": {},
+      "liquidation_review": null,
+      "approved_by": null,
+      "expires_at": null,
+      "ref": null
+    },
+    {
+      "id": 2,
+      "t": 0,
+      "t_label": "T+00:00",
+      "type": "transition",
+      "sev": 3,
+      "scenario_tags": [
+        "M1"
+      ],
+      "actor": "system",
+      "action": "NORMAL -> WARNING (PX_CHG_5M -6.1%, LIQ_RATE 102/min).",
+      "rationale": null,
+      "signal_snapshot": {
+        "PX_CHG_5M": -6.1,
+        "LIQ_RATE": 102.0
+      },
+      "liquidation_review": null,
+      "approved_by": null,
+      "expires_at": null,
+      "ref": null
+    },
+    {
+      "id": 3,
+      "t": 20,
+      "t_label": "T+00:20",
+      "type": "decision",
+      "sev": 3,
+      "scenario_tags": [
+        "M1"
+      ],
+      "actor": "IC",
+      "action": "Acknowledged Warning alert.",
+      "rationale": "Confirmed sharp move on the primary book; LAR 1.1, nominal.",
+      "signal_snapshot": {
+        "PX_CHG_5M": -6.1,
+        "LIQ_RATE": 102.0,
+        "LAR": 1.1
+      },
+      "liquidation_review": "market-explained",
+      "approved_by": "IC",
+      "expires_at": null,
+      "ref": "a1"
+    },
+    {
+      "id": 4,
+      "t": 45,
+      "t_label": "T+00:45",
+      "type": "decision",
+      "sev": 3,
+      "scenario_tags": [
+        "M1"
+      ],
+      "actor": "TL",
+      "action": "Confirmed price feed and liquidation engine healthy.",
+      "rationale": "ORACLE_AGE 1s, API_ERR_PCT 0.3%, no engine errors.",
+      "signal_snapshot": {
+        "ORACLE_AGE": 1.0,
+        "API_ERR_PCT": 0.3
+      },
+      "liquidation_review": null,
+      "approved_by": "TL",
+      "expires_at": null,
+      "ref": "a2"
+    },
+    {
+      "id": 5,
+      "t": 90,
+      "t_label": "T+01:30",
+      "type": "decision",
+      "sev": 3,
+      "scenario_tags": [
+        "M1"
+      ],
+      "actor": "IC",
+      "action": "Approved leverage cap: 10x -> 3x on new positions.",
+      "rationale": "Slow future cascade size while liquidations remain market-explained.",
+      "signal_snapshot": {
+        "LIQ_RATE": 140.0,
+        "LAR": 1.1
+      },
+      "liquidation_review": null,
+      "approved_by": "IC",
+      "expires_at": null,
+      "ref": "a3"
+    },
+    {
+      "id": 6,
+      "t": 95,
+      "t_label": "T+01:35",
+      "type": "comm",
+      "sev": 3,
+      "scenario_tags": [
+        "M1"
+      ],
+      "actor": "CS",
+      "action": "Sent T1 volatility notice (in-app banner).",
+      "rationale": null,
+      "signal_snapshot": {
+        "PX_CHG_5M": -6.2
+      },
+      "liquidation_review": null,
+      "approved_by": "CS",
+      "expires_at": null,
+      "ref": "t1"
+    },
+    {
+      "id": 7,
+      "t": 360,
+      "t_label": "T+06:00",
+      "type": "alert",
+      "sev": 3,
+      "scenario_tags": [
+        "M1",
+        "I1"
+      ],
+      "actor": "system",
+      "action": "Tag I1 added: ticket volume 4.1x baseline.",
+      "rationale": null,
+      "signal_snapshot": {
+        "TICKET_RATE": 4.1,
+        "SENTIMENT": -0.28
+      },
+      "liquidation_review": null,
+      "approved_by": null,
+      "expires_at": null,
+      "ref": null
+    },
+    {
+      "id": 8,
+      "t": 380,
+      "t_label": "T+06:20",
+      "type": "comm",
+      "sev": 3,
+      "scenario_tags": [
+        "M1",
+        "I1"
+      ],
+      "actor": "CS",
+      "action": "Sent T11 support FAQ (top-3 answers) to queue.",
+      "rationale": null,
+      "signal_snapshot": {
+        "TICKET_RATE": 4.1
+      },
+      "liquidation_review": null,
+      "approved_by": "CS",
+      "expires_at": null,
+      "ref": "t11"
+    },
+    {
+      "id": 9,
+      "t": 840,
+      "t_label": "T+14:00",
+      "type": "alert",
+      "sev": 3,
+      "scenario_tags": [
+        "M1",
+        "I1",
+        "M2"
+      ],
+      "actor": "system",
+      "action": "Tag M2 added: INS_FUND_PCT 42%, falling.",
+      "rationale": null,
+      "signal_snapshot": {
+        "INS_FUND_PCT": 42.0,
+        "BAD_DEBT_RATE": 0.3
+      },
+      "liquidation_review": null,
+      "approved_by": null,
+      "expires_at": null,
+      "ref": null
+    },
+    {
+      "id": 10,
+      "t": 850,
+      "t_label": "T+14:10",
+      "type": "transition",
+      "sev": 2,
+      "scenario_tags": [
+        "M1",
+        "I1",
+        "M2"
+      ],
+      "actor": "system",
+      "action": "WARNING -> CRITICAL (LIQ_RATE 405/min, INS_FUND_PCT 41%).",
+      "rationale": null,
+      "signal_snapshot": {
+        "LIQ_RATE": 405.0,
+        "INS_FUND_PCT": 41.0
+      },
+      "liquidation_review": null,
+      "approved_by": null,
+      "expires_at": null,
+      "ref": null
+    },
+    {
+      "id": 11,
+      "t": 855,
+      "t_label": "T+14:15",
+      "type": "decision",
+      "sev": 2,
+      "scenario_tags": [
+        "M1",
+        "I1",
+        "M2"
+      ],
+      "actor": "IC",
+      "action": "Proposed reduce-only on BTC-PERP, ETH-PERP.",
+      "rationale": "Insurance fund at 40% and falling ~4%/min; LIQ_RATE 410/min.",
+      "signal_snapshot": {
+        "INS_FUND_PCT": 40.0,
+        "LIQ_RATE": 410.0
+      },
+      "liquidation_review": null,
+      "approved_by": null,
+      "expires_at": null,
+      "ref": "a4"
+    },
+    {
+      "id": 12,
+      "t": 1300,
+      "t_label": "T+21:40",
+      "type": "alert",
+      "sev": 2,
+      "scenario_tags": [
+        "M1",
+        "I1",
+        "M2"
+      ],
+      "actor": "system",
+      "action": "INS_FUND_PCT crossed 25%; hard override imminent.",
+      "rationale": null,
+      "signal_snapshot": {
+        "INS_FUND_PCT": 26.0
+      },
+      "liquidation_review": null,
+      "approved_by": null,
+      "expires_at": null,
+      "ref": null
+    },
+    {
+      "id": 13,
+      "t": 1400,
+      "t_label": "T+23:20",
+      "type": "transition",
+      "sev": 1,
+      "scenario_tags": [
+        "M1",
+        "I1",
+        "M2"
+      ],
+      "actor": "system",
+      "action": "CRITICAL -> EMERGENCY (insurance fund below 25% override).",
+      "rationale": null,
+      "signal_snapshot": {
+        "INS_FUND_PCT": 23.0
+      },
+      "liquidation_review": null,
+      "approved_by": null,
+      "expires_at": null,
+      "ref": null
+    },
+    {
+      "id": 14,
+      "t": 1410,
+      "t_label": "T+23:30",
+      "type": "decision",
+      "sev": 1,
+      "scenario_tags": [
+        "M1",
+        "I1",
+        "M2"
+      ],
+      "actor": "IC",
+      "action": "Declared SEV-1; paged founders.",
+      "rationale": "Insurance fund below 25% override; reduce-only was not yet approved.",
+      "signal_snapshot": {
+        "INS_FUND_PCT": 22.0
+      },
+      "liquidation_review": null,
+      "approved_by": "IC",
+      "expires_at": null,
+      "ref": "a6"
+    }
+  ],
+  "forecast": {
+    "computed_t": 1440,
+    "horizon_min": [
+      5,
+      10,
+      15
+    ],
+    "n_paths": 200,
+    "sev_probs": [
+      {
+        "h": 5,
+        "p": {
+          "1": 0.95,
+          "2": 0.05,
+          "3": 0.0,
+          "4": 0.0
+        }
+      },
+      {
+        "h": 10,
+        "p": {
+          "1": 0.97,
+          "2": 0.03,
+          "3": 0.0,
+          "4": 0.0
+        }
+      },
+      {
+        "h": 15,
+        "p": {
+          "1": 0.98,
+          "2": 0.02,
+          "3": 0.0,
+          "4": 0.0
+        }
+      }
+    ],
+    "eta_sev1_min": {
+      "p50": 0.0,
+      "p90": 0.0,
+      "prob_within_15": 1.0
+    },
+    "ins_fund": [
+      {
+        "h": 5,
+        "p10": 14.0,
+        "p50": 19.0,
+        "p90": 23.0
+      },
+      {
+        "h": 10,
+        "p10": 9.0,
+        "p50": 15.0,
+        "p90": 20.0
+      },
+      {
+        "h": 15,
+        "p10": 4.0,
+        "p50": 12.0,
+        "p90": 18.0
+      }
+    ],
+    "eta_fund_25_min": {
+      "p50": null,
+      "p90": null,
+      "prob_within_15": 0.0
+    },
+    "drivers": [
+      {
+        "signal": "INS_FUND_PCT",
+        "contribution": 0.48,
+        "text": "Fund already below the 25% override"
+      },
+      {
+        "signal": "LIQ_RATE",
+        "contribution": 0.31,
+        "text": "Liquidations still accelerating"
+      },
+      {
+        "signal": "BAD_DEBT_RATE",
+        "contribution": 0.14,
+        "text": "Bad debt compounding the draw"
+      }
+    ],
+    "cascade_model_p": 0.94,
+    "headline": "SEV-1 confirmed \u2014 insurance fund at 22% and ADL risk rising",
+    "label": "Simulated projection \u2014 not a market forecast"
+  },
+  "reminders": [
+    "Customer update overdue (last T+01:35)",
+    "Reduce-only still not approved \u2014 insurance fund below the SEV-1 override"
+  ]
+}

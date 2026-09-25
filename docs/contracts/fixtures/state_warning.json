@@ -1,0 +1,1508 @@
+{
+  "sim": {
+    "scenario_id": "C1",
+    "scenario_name": "Black Tuesday",
+    "t": 130,
+    "t_label": "T+02:10",
+    "speed": 8.0,
+    "running": true,
+    "duration_s": 3600,
+    "started": true
+  },
+  "severity": {
+    "state": "WARNING",
+    "sev": 3,
+    "score": 32.0,
+    "dims": {
+      "F": 3.0,
+      "B": 1.0,
+      "A": 0.0,
+      "V": 3.0,
+      "R": 0.0
+    },
+    "overrides": [],
+    "since_t": 0,
+    "pending": null
+  },
+  "classifier": {
+    "verdict": "MARKET",
+    "lar": 1.1,
+    "l_obs": 13.2,
+    "l_exp": 12.0,
+    "explanation": "Liquidations track the price move (LAR 1.1, within the 0.7-1.5 band): market-driven, not a system issue."
+  },
+  "tags": [
+    {
+      "tag": "M1",
+      "name": "Directional flash crash",
+      "active": true,
+      "first_t": 0,
+      "peak_sev": 3
+    }
+  ],
+  "signals": [
+    {
+      "code": "PX_CHG_5M",
+      "label": "Underlying price change (5m)",
+      "unit": "%",
+      "value": -6.2,
+      "status": "warn",
+      "relevant": true,
+      "trend_per_min": -2.7468,
+      "history": [
+        [
+          0,
+          -0.2486
+        ],
+        [
+          6,
+          -0.044
+        ],
+        [
+          11,
+          -0.3346
+        ],
+        [
+          17,
+          -1.048
+        ],
+        [
+          23,
+          -0.991
+        ],
+        [
+          28,
+          -1.5785
+        ],
+        [
+          34,
+          -1.8269
+        ],
+        [
+          40,
+          -1.6993
+        ],
+        [
+          45,
+          -1.9458
+        ],
+        [
+          51,
+          -2.203
+        ],
+        [
+          57,
+          -2.7976
+        ],
+        [
+          62,
+          -2.8179
+        ],
+        [
+          68,
+          -3.0962
+        ],
+        [
+          73,
+          -3.721
+        ],
+        [
+          79,
+          -4.0169
+        ],
+        [
+          85,
+          -4.2402
+        ],
+        [
+          90,
+          -4.2396
+        ],
+        [
+          96,
+          -4.7331
+        ],
+        [
+          102,
+          -4.6152
+        ],
+        [
+          107,
+          -5.0035
+        ],
+        [
+          113,
+          -5.344
+        ],
+        [
+          119,
+          -5.8869
+        ],
+        [
+          124,
+          -5.8919
+        ],
+        [
+          130,
+          -6.2
+        ]
+      ],
+      "thresholds": {
+        "watch": -2.0,
+        "warn": -5.0,
+        "critical": -10.0
+      },
+      "direction": "down"
+    },
+    {
+      "code": "LIQ_RATE",
+      "label": "Liquidation rate",
+      "unit": "/min",
+      "value": 145.0,
+      "status": "warn",
+      "relevant": true,
+      "trend_per_min": 62.1293,
+      "history": [
+        [
+          0,
+          10.3865
+        ],
+        [
+          6,
+          15.4833
+        ],
+        [
+          11,
+          20.3561
+        ],
+        [
+          17,
+          21.6412
+        ],
+        [
+          23,
+          29.851
+        ],
+        [
+          28,
+          35.9174
+        ],
+        [
+          34,
+          40.3411
+        ],
+        [
+          40,
+          44.6219
+        ],
+        [
+          45,
+          52.7529
+        ],
+        [
+          51,
+          61.5841
+        ],
+        [
+          57,
+          61.9691
+        ],
+        [
+          62,
+          68.531
+        ],
+        [
+          68,
+          83.3491
+        ],
+        [
+          73,
+          82.7714
+        ],
+        [
+          79,
+          90.183
+        ],
+        [
+          85,
+          91.7585
+        ],
+        [
+          90,
+          105.9886
+        ],
+        [
+          96,
+          107.465
+        ],
+        [
+          102,
+          113.9104
+        ],
+        [
+          107,
+          120.7219
+        ],
+        [
+          113,
+          124.5264
+        ],
+        [
+          119,
+          130.2504
+        ],
+        [
+          124,
+          135.7813
+        ],
+        [
+          130,
+          145.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 30.0,
+        "warn": 100.0,
+        "critical": 300.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "BAD_DEBT_RATE",
+      "label": "Bad debt rate",
+      "unit": "%fund/min",
+      "value": 0.05,
+      "status": "warn",
+      "relevant": true,
+      "trend_per_min": 0.0225,
+      "history": [
+        [
+          0,
+          0.0013
+        ],
+        [
+          6,
+          -0.0
+        ],
+        [
+          11,
+          0.0051
+        ],
+        [
+          17,
+          0.0081
+        ],
+        [
+          23,
+          0.0066
+        ],
+        [
+          28,
+          0.0099
+        ],
+        [
+          34,
+          0.0139
+        ],
+        [
+          40,
+          0.0163
+        ],
+        [
+          45,
+          0.0187
+        ],
+        [
+          51,
+          0.0167
+        ],
+        [
+          57,
+          0.0223
+        ],
+        [
+          62,
+          0.0238
+        ],
+        [
+          68,
+          0.0288
+        ],
+        [
+          73,
+          0.0308
+        ],
+        [
+          79,
+          0.0322
+        ],
+        [
+          85,
+          0.0338
+        ],
+        [
+          90,
+          0.0336
+        ],
+        [
+          96,
+          0.0386
+        ],
+        [
+          102,
+          0.0389
+        ],
+        [
+          107,
+          0.0408
+        ],
+        [
+          113,
+          0.0436
+        ],
+        [
+          119,
+          0.0451
+        ],
+        [
+          124,
+          0.048
+        ],
+        [
+          130,
+          0.05
+        ]
+      ],
+      "thresholds": {
+        "watch": 0.01,
+        "warn": 0.01,
+        "critical": 2.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "LAR",
+      "label": "Liquidation anomaly ratio",
+      "unit": "ratio",
+      "value": 1.1,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": 0.048,
+      "history": [
+        [
+          0,
+          0.9959
+        ],
+        [
+          19,
+          1.0193
+        ],
+        [
+          37,
+          1.028
+        ],
+        [
+          56,
+          1.0401
+        ],
+        [
+          74,
+          1.0552
+        ],
+        [
+          93,
+          1.0686
+        ],
+        [
+          111,
+          1.0858
+        ],
+        [
+          130,
+          1.1
+        ]
+      ],
+      "thresholds": {
+        "watch": 1.5,
+        "warn": 2.0,
+        "critical": 3.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "INS_FUND_PCT",
+      "label": "Insurance fund (% of start)",
+      "unit": "%",
+      "value": 97.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -1.3862,
+      "history": [
+        [
+          0,
+          100.0034
+        ],
+        [
+          19,
+          99.6455
+        ],
+        [
+          37,
+          99.0516
+        ],
+        [
+          56,
+          98.6257
+        ],
+        [
+          74,
+          98.3153
+        ],
+        [
+          93,
+          97.7493
+        ],
+        [
+          111,
+          97.3883
+        ],
+        [
+          130,
+          97.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 90.0,
+        "warn": 60.0,
+        "critical": 25.0
+      },
+      "direction": "down"
+    },
+    {
+      "code": "ADL_COUNT",
+      "label": "Auto-deleverage events",
+      "unit": "count",
+      "value": 0.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": 0.0002,
+      "history": [
+        [
+          0,
+          -0.0005
+        ],
+        [
+          19,
+          -0.0001
+        ],
+        [
+          37,
+          0.0009
+        ],
+        [
+          56,
+          0.0006
+        ],
+        [
+          74,
+          0.0002
+        ],
+        [
+          93,
+          -0.0009
+        ],
+        [
+          111,
+          -0.0007
+        ],
+        [
+          130,
+          0.0
+        ]
+      ],
+      "thresholds": {
+        "watch": null,
+        "warn": null,
+        "critical": 1.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "NEG_BAL_ACCTS",
+      "label": "Negative-balance accounts",
+      "unit": "count",
+      "value": 0.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0001,
+      "history": [
+        [
+          0,
+          0.0002
+        ],
+        [
+          19,
+          0.0001
+        ],
+        [
+          37,
+          -0.0005
+        ],
+        [
+          56,
+          -0.0005
+        ],
+        [
+          74,
+          0.0004
+        ],
+        [
+          93,
+          0.0005
+        ],
+        [
+          111,
+          -0.0006
+        ],
+        [
+          130,
+          0.0
+        ]
+      ],
+      "thresholds": {
+        "watch": null,
+        "warn": 1.0,
+        "critical": 50.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "ORACLE_DEV",
+      "label": "Oracle deviation",
+      "unit": "%",
+      "value": 0.05,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0003,
+      "history": [
+        [
+          0,
+          0.0506
+        ],
+        [
+          19,
+          0.0493
+        ],
+        [
+          37,
+          0.0492
+        ],
+        [
+          56,
+          0.0501
+        ],
+        [
+          74,
+          0.0498
+        ],
+        [
+          93,
+          0.0493
+        ],
+        [
+          111,
+          0.0497
+        ],
+        [
+          130,
+          0.05
+        ]
+      ],
+      "thresholds": {
+        "watch": 0.3,
+        "warn": 0.5,
+        "critical": 1.5
+      },
+      "direction": "up"
+    },
+    {
+      "code": "ORACLE_AGE",
+      "label": "Oracle age",
+      "unit": "s",
+      "value": 1.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": 0.0001,
+      "history": [
+        [
+          0,
+          0.9998
+        ],
+        [
+          19,
+          1.0006
+        ],
+        [
+          37,
+          1.0003
+        ],
+        [
+          56,
+          1.0007
+        ],
+        [
+          74,
+          0.9996
+        ],
+        [
+          93,
+          0.9992
+        ],
+        [
+          111,
+          1.0004
+        ],
+        [
+          130,
+          1.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 3.0,
+        "warn": 5.0,
+        "critical": 15.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "STBL_PX",
+      "label": "Stablecoin price",
+      "unit": "USD",
+      "value": 1.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0,
+      "history": [
+        [
+          0,
+          1.0001
+        ],
+        [
+          19,
+          1.0006
+        ],
+        [
+          37,
+          1.0004
+        ],
+        [
+          56,
+          0.9999
+        ],
+        [
+          74,
+          1.0006
+        ],
+        [
+          93,
+          1.0005
+        ],
+        [
+          111,
+          0.9991
+        ],
+        [
+          130,
+          1.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 0.995,
+        "warn": 0.985,
+        "critical": 0.97
+      },
+      "direction": "down"
+    },
+    {
+      "code": "SETTLE_FAIL_PCT",
+      "label": "Settlement failure rate",
+      "unit": "%",
+      "value": 0.2,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": 0.0,
+      "history": [
+        [
+          0,
+          0.1999
+        ],
+        [
+          19,
+          0.1996
+        ],
+        [
+          37,
+          0.1996
+        ],
+        [
+          56,
+          0.2007
+        ],
+        [
+          74,
+          0.2006
+        ],
+        [
+          93,
+          0.1999
+        ],
+        [
+          111,
+          0.1991
+        ],
+        [
+          130,
+          0.2
+        ]
+      ],
+      "thresholds": {
+        "watch": 1.0,
+        "warn": 2.0,
+        "critical": 10.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "LP_REJECT_PCT",
+      "label": "LP reject rate",
+      "unit": "%",
+      "value": 0.5,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": 0.0002,
+      "history": [
+        [
+          0,
+          0.4996
+        ],
+        [
+          19,
+          0.4994
+        ],
+        [
+          37,
+          0.5006
+        ],
+        [
+          56,
+          0.5004
+        ],
+        [
+          74,
+          0.4991
+        ],
+        [
+          93,
+          0.5009
+        ],
+        [
+          111,
+          0.4991
+        ],
+        [
+          130,
+          0.5
+        ]
+      ],
+      "thresholds": {
+        "watch": 2.0,
+        "warn": 5.0,
+        "critical": 20.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "NET_EXPOSURE_PCT",
+      "label": "Net exposure (% of limit)",
+      "unit": "% of limit",
+      "value": 24.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": 1.891,
+      "history": [
+        [
+          0,
+          19.9029
+        ],
+        [
+          19,
+          20.6252
+        ],
+        [
+          37,
+          21.2443
+        ],
+        [
+          56,
+          21.7779
+        ],
+        [
+          74,
+          22.3955
+        ],
+        [
+          93,
+          22.9129
+        ],
+        [
+          111,
+          23.5094
+        ],
+        [
+          130,
+          24.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 50.0,
+        "warn": 70.0,
+        "critical": 100.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "WDR_QUEUE_RATIO",
+      "label": "Withdrawal queue ratio",
+      "unit": "%",
+      "value": 5.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": 0.0003,
+      "history": [
+        [
+          0,
+          4.9993
+        ],
+        [
+          19,
+          4.9997
+        ],
+        [
+          37,
+          5.0002
+        ],
+        [
+          56,
+          5.0003
+        ],
+        [
+          74,
+          4.9991
+        ],
+        [
+          93,
+          5.0003
+        ],
+        [
+          111,
+          4.9993
+        ],
+        [
+          130,
+          5.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 25.0,
+        "warn": 50.0,
+        "critical": 90.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "INR_BASIS_PCT",
+      "label": "INR/USDT basis",
+      "unit": "%",
+      "value": 0.2,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0003,
+      "history": [
+        [
+          0,
+          0.2006
+        ],
+        [
+          19,
+          0.1996
+        ],
+        [
+          37,
+          0.2
+        ],
+        [
+          56,
+          0.2003
+        ],
+        [
+          74,
+          0.1995
+        ],
+        [
+          93,
+          0.1995
+        ],
+        [
+          111,
+          0.2003
+        ],
+        [
+          130,
+          0.2
+        ]
+      ],
+      "thresholds": {
+        "watch": 0.5,
+        "warn": 1.0,
+        "critical": 3.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "ORDER_LATENCY_P95",
+      "label": "Order latency p95",
+      "unit": "ms",
+      "value": 80.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": 0.0002,
+      "history": [
+        [
+          0,
+          79.9996
+        ],
+        [
+          19,
+          79.9995
+        ],
+        [
+          37,
+          79.9999
+        ],
+        [
+          56,
+          79.9998
+        ],
+        [
+          74,
+          80.0005
+        ],
+        [
+          93,
+          80.0
+        ],
+        [
+          111,
+          79.999
+        ],
+        [
+          130,
+          80.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 400.0,
+        "warn": 1000.0,
+        "critical": 5000.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "API_ERR_PCT",
+      "label": "API error rate",
+      "unit": "%",
+      "value": 0.3,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0003,
+      "history": [
+        [
+          0,
+          0.3007
+        ],
+        [
+          19,
+          0.2992
+        ],
+        [
+          37,
+          0.3009
+        ],
+        [
+          56,
+          0.3006
+        ],
+        [
+          74,
+          0.2996
+        ],
+        [
+          93,
+          0.3009
+        ],
+        [
+          111,
+          0.2995
+        ],
+        [
+          130,
+          0.3
+        ]
+      ],
+      "thresholds": {
+        "watch": 1.0,
+        "warn": 2.0,
+        "critical": 10.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "UPI_FAIL_PCT",
+      "label": "UPI failure rate",
+      "unit": "%",
+      "value": 1.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0,
+      "history": [
+        [
+          0,
+          1.0001
+        ],
+        [
+          19,
+          1.0003
+        ],
+        [
+          37,
+          1.0007
+        ],
+        [
+          56,
+          0.9996
+        ],
+        [
+          74,
+          0.9992
+        ],
+        [
+          93,
+          0.9992
+        ],
+        [
+          111,
+          1.0001
+        ],
+        [
+          130,
+          1.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 3.0,
+        "warn": 5.0,
+        "critical": 25.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "TICKET_RATE",
+      "label": "Support ticket rate",
+      "unit": "\u00d7 baseline",
+      "value": 1.4,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": 0.1785,
+      "history": [
+        [
+          0,
+          1.0132
+        ],
+        [
+          19,
+          1.0572
+        ],
+        [
+          37,
+          1.1003
+        ],
+        [
+          56,
+          1.1804
+        ],
+        [
+          74,
+          1.2363
+        ],
+        [
+          93,
+          1.2788
+        ],
+        [
+          111,
+          1.3399
+        ],
+        [
+          130,
+          1.4
+        ]
+      ],
+      "thresholds": {
+        "watch": 2.0,
+        "warn": 3.0,
+        "critical": 8.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "SENTIMENT",
+      "label": "Social sentiment",
+      "unit": "\u22121\u2026+1",
+      "value": 0.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0475,
+      "history": [
+        [
+          0,
+          0.1029
+        ],
+        [
+          19,
+          0.0882
+        ],
+        [
+          37,
+          0.0684
+        ],
+        [
+          56,
+          0.0566
+        ],
+        [
+          74,
+          0.0443
+        ],
+        [
+          93,
+          0.0274
+        ],
+        [
+          111,
+          0.0095
+        ],
+        [
+          130,
+          0.0
+        ]
+      ],
+      "thresholds": {
+        "watch": -0.2,
+        "warn": -0.4,
+        "critical": -0.7
+      },
+      "direction": "down"
+    },
+    {
+      "code": "RUMOR_MENTIONS",
+      "label": "Rumor mentions",
+      "unit": "/min",
+      "value": 0.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0004,
+      "history": [
+        [
+          0,
+          0.0008
+        ],
+        [
+          19,
+          0.0003
+        ],
+        [
+          37,
+          -0.0001
+        ],
+        [
+          56,
+          0.0006
+        ],
+        [
+          74,
+          -0.0002
+        ],
+        [
+          93,
+          -0.0004
+        ],
+        [
+          111,
+          -0.0002
+        ],
+        [
+          130,
+          0.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 5.0,
+        "warn": 20.0,
+        "critical": 60.0
+      },
+      "direction": "up"
+    }
+  ],
+  "alerts": [
+    {
+      "id": "al-px-warn",
+      "signal": "PX_CHG_5M",
+      "level": "warn",
+      "count": 4,
+      "first_t": 0,
+      "last_t": 120,
+      "acknowledged_by": "IC"
+    },
+    {
+      "id": "al-liq-warn",
+      "signal": "LIQ_RATE",
+      "level": "warn",
+      "count": 6,
+      "first_t": 0,
+      "last_t": 130,
+      "acknowledged_by": "IC"
+    }
+  ],
+  "actions": [
+    {
+      "id": "a1",
+      "tag": "M1",
+      "role": "IC",
+      "text": "Acknowledge Warning alert",
+      "priority": 1,
+      "control_id": null,
+      "template_id": null,
+      "status": "done",
+      "proposed_t": 0,
+      "decided_t": 20,
+      "decided_by": "IC",
+      "rationale": "Confirmed sharp move on the primary book; LAR 1.1, nominal.",
+      "rationale_hint": "PX_CHG_5M -6.1%, LIQ_RATE 102/min \u2014 confirm and check LAR.",
+      "expires_t": null,
+      "what_if": null
+    },
+    {
+      "id": "a2",
+      "tag": null,
+      "role": "TL",
+      "text": "Confirm price feed and liquidation engine health",
+      "priority": 2,
+      "control_id": null,
+      "template_id": null,
+      "status": "done",
+      "proposed_t": 0,
+      "decided_t": 45,
+      "decided_by": "TL",
+      "rationale": "ORACLE_AGE 1s, API_ERR_PCT 0.3%, no engine errors.",
+      "rationale_hint": "Check ORACLE_AGE, API_ERR_PCT and engine error rate.",
+      "expires_t": null,
+      "what_if": null
+    },
+    {
+      "id": "a3",
+      "tag": "M1",
+      "role": "IC",
+      "text": "Cap max leverage on new positions (10x -> 3x)",
+      "priority": 3,
+      "control_id": "leverage_cap",
+      "template_id": null,
+      "status": "approved",
+      "proposed_t": 20,
+      "decided_t": 90,
+      "decided_by": "IC",
+      "rationale": "Slow future cascade size while liquidations remain market-explained.",
+      "rationale_hint": "LIQ_RATE climbing in line with the move; slow future cascade size.",
+      "expires_t": null,
+      "what_if": null
+    },
+    {
+      "id": "a10",
+      "tag": "M1",
+      "role": "CS",
+      "text": "Send T1 volatility notice (in-app banner)",
+      "priority": 1,
+      "control_id": null,
+      "template_id": "t1",
+      "status": "done",
+      "proposed_t": 0,
+      "decided_t": 95,
+      "decided_by": "CS",
+      "rationale": "Factual volatility notice; no cause named yet.",
+      "rationale_hint": "PX_CHG_5M -6% and falling; give users a heads-up on liquidation risk.",
+      "expires_t": null,
+      "what_if": null
+    }
+  ],
+  "templates": [
+    {
+      "id": "t1",
+      "tag": "M1",
+      "audience": "Customer",
+      "channel": "in-app banner",
+      "title": "Volatility notice",
+      "text": "Markets are moving sharply. NVDA-PERP is down 6.2% in the last 5 minutes. MochaTrade systems are operating normally. Leveraged positions carry higher liquidation risk right now; review your margin.",
+      "missing": [],
+      "status": "sent",
+      "surfaced_t": 0,
+      "sent_t": 95,
+      "approved_by": "CS"
+    }
+  ],
+  "controls_active": [
+    {
+      "control_id": "leverage_cap",
+      "label": "Max leverage on new positions: 10x -> 3x",
+      "approved_t": 90,
+      "approved_by": "IC",
+      "expires_t": null,
+      "params": {
+        "max_leverage": 3.0
+      }
+    }
+  ],
+  "log": [
+    {
+      "id": 1,
+      "t": -60,
+      "t_label": "T-01:00",
+      "type": "transition",
+      "sev": 4,
+      "scenario_tags": [],
+      "actor": "system",
+      "action": "Incident timer started for scenario C1 'Black Tuesday'.",
+      "rationale": null,
+      "signal_snapshot": {},
+      "liquidation_review": null,
+      "approved_by": null,
+      "expires_at": null,
+      "ref": null
+    },
+    {
+      "id": 2,
+      "t": 0,
+      "t_label": "T+00:00",
+      "type": "transition",
+      "sev": 3,
+      "scenario_tags": [
+        "M1"
+      ],
+      "actor": "system",
+      "action": "NORMAL -> WARNING (PX_CHG_5M -6.1%, LIQ_RATE 102/min).",
+      "rationale": null,
+      "signal_snapshot": {
+        "PX_CHG_5M": -6.1,
+        "LIQ_RATE": 102.0
+      },
+      "liquidation_review": null,
+      "approved_by": null,
+      "expires_at": null,
+      "ref": null
+    },
+    {
+      "id": 3,
+      "t": 20,
+      "t_label": "T+00:20",
+      "type": "decision",
+      "sev": 3,
+      "scenario_tags": [
+        "M1"
+      ],
+      "actor": "IC",
+      "action": "Acknowledged Warning alert.",
+      "rationale": "Confirmed sharp move on the primary book; LAR 1.1, nominal.",
+      "signal_snapshot": {
+        "PX_CHG_5M": -6.1,
+        "LIQ_RATE": 102.0,
+        "LAR": 1.1
+      },
+      "liquidation_review": "market-explained",
+      "approved_by": "IC",
+      "expires_at": null,
+      "ref": "a1"
+    },
+    {
+      "id": 4,
+      "t": 45,
+      "t_label": "T+00:45",
+      "type": "decision",
+      "sev": 3,
+      "scenario_tags": [
+        "M1"
+      ],
+      "actor": "TL",
+      "action": "Confirmed price feed and liquidation engine healthy.",
+      "rationale": "ORACLE_AGE 1s, API_ERR_PCT 0.3%, no engine errors.",
+      "signal_snapshot": {
+        "ORACLE_AGE": 1.0,
+        "API_ERR_PCT": 0.3
+      },
+      "liquidation_review": null,
+      "approved_by": "TL",
+      "expires_at": null,
+      "ref": "a2"
+    },
+    {
+      "id": 5,
+      "t": 90,
+      "t_label": "T+01:30",
+      "type": "decision",
+      "sev": 3,
+      "scenario_tags": [
+        "M1"
+      ],
+      "actor": "IC",
+      "action": "Approved leverage cap: 10x -> 3x on new positions.",
+      "rationale": "Slow future cascade size while liquidations remain market-explained.",
+      "signal_snapshot": {
+        "LIQ_RATE": 140.0,
+        "LAR": 1.1
+      },
+      "liquidation_review": null,
+      "approved_by": "IC",
+      "expires_at": null,
+      "ref": "a3"
+    },
+    {
+      "id": 6,
+      "t": 95,
+      "t_label": "T+01:35",
+      "type": "comm",
+      "sev": 3,
+      "scenario_tags": [
+        "M1"
+      ],
+      "actor": "CS",
+      "action": "Sent T1 volatility notice (in-app banner).",
+      "rationale": null,
+      "signal_snapshot": {
+        "PX_CHG_5M": -6.2
+      },
+      "liquidation_review": null,
+      "approved_by": "CS",
+      "expires_at": null,
+      "ref": "t1"
+    }
+  ],
+  "forecast": null,
+  "reminders": []
+}

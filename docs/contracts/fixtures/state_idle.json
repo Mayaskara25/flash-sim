@@ -1,0 +1,1073 @@
+{
+  "sim": {
+    "scenario_id": null,
+    "scenario_name": null,
+    "t": 0,
+    "t_label": "T+00:00",
+    "speed": 0.0,
+    "running": false,
+    "duration_s": 0,
+    "started": false
+  },
+  "severity": {
+    "state": "NORMAL",
+    "sev": 4,
+    "score": 0.0,
+    "dims": {
+      "F": 0.0,
+      "B": 0.0,
+      "A": 0.0,
+      "V": 0.0,
+      "R": 0.0
+    },
+    "overrides": [],
+    "since_t": 0,
+    "pending": null
+  },
+  "classifier": {
+    "verdict": "NONE",
+    "lar": 1.0,
+    "l_obs": 0.0,
+    "l_exp": 0.0,
+    "explanation": "No incident active."
+  },
+  "tags": [],
+  "signals": [
+    {
+      "code": "PX_CHG_5M",
+      "label": "Underlying price change (5m)",
+      "unit": "%",
+      "value": 0.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0007,
+      "history": [
+        [
+          -60,
+          0.0007
+        ],
+        [
+          -51,
+          0.0005
+        ],
+        [
+          -43,
+          0.0008
+        ],
+        [
+          -34,
+          -0.0007
+        ],
+        [
+          -26,
+          0.0007
+        ],
+        [
+          -17,
+          -0.0008
+        ],
+        [
+          -9,
+          -0.0004
+        ],
+        [
+          0,
+          0.0
+        ]
+      ],
+      "thresholds": {
+        "watch": -2.0,
+        "warn": -5.0,
+        "critical": -10.0
+      },
+      "direction": "down"
+    },
+    {
+      "code": "LIQ_RATE",
+      "label": "Liquidation rate",
+      "unit": "/min",
+      "value": 5.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0008,
+      "history": [
+        [
+          -60,
+          5.0008
+        ],
+        [
+          -51,
+          5.0005
+        ],
+        [
+          -43,
+          4.9999
+        ],
+        [
+          -34,
+          5.0
+        ],
+        [
+          -26,
+          5.0004
+        ],
+        [
+          -17,
+          5.0007
+        ],
+        [
+          -9,
+          4.9997
+        ],
+        [
+          0,
+          5.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 30.0,
+        "warn": 100.0,
+        "critical": 300.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "LAR",
+      "label": "Liquidation anomaly ratio",
+      "unit": "ratio",
+      "value": 1.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0009,
+      "history": [
+        [
+          -60,
+          1.0009
+        ],
+        [
+          -51,
+          0.9996
+        ],
+        [
+          -43,
+          0.9991
+        ],
+        [
+          -34,
+          1.001
+        ],
+        [
+          -26,
+          0.9997
+        ],
+        [
+          -17,
+          0.9992
+        ],
+        [
+          -9,
+          1.0008
+        ],
+        [
+          0,
+          1.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 1.5,
+        "warn": 2.0,
+        "critical": 3.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "INS_FUND_PCT",
+      "label": "Insurance fund (% of start)",
+      "unit": "%",
+      "value": 100.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0009,
+      "history": [
+        [
+          -60,
+          100.0009
+        ],
+        [
+          -51,
+          99.9994
+        ],
+        [
+          -43,
+          99.9992
+        ],
+        [
+          -34,
+          100.001
+        ],
+        [
+          -26,
+          99.9999
+        ],
+        [
+          -17,
+          100.0009
+        ],
+        [
+          -9,
+          99.9995
+        ],
+        [
+          0,
+          100.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 90.0,
+        "warn": 60.0,
+        "critical": 25.0
+      },
+      "direction": "down"
+    },
+    {
+      "code": "BAD_DEBT_RATE",
+      "label": "Bad debt rate",
+      "unit": "%fund/min",
+      "value": 0.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0008,
+      "history": [
+        [
+          -60,
+          0.0008
+        ],
+        [
+          -51,
+          -0.0001
+        ],
+        [
+          -43,
+          0.0007
+        ],
+        [
+          -34,
+          0.0006
+        ],
+        [
+          -26,
+          -0.0001
+        ],
+        [
+          -17,
+          0.0004
+        ],
+        [
+          -9,
+          0.0006
+        ],
+        [
+          0,
+          0.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 0.01,
+        "warn": 0.01,
+        "critical": 2.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "ADL_COUNT",
+      "label": "Auto-deleverage events",
+      "unit": "count",
+      "value": 0.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0008,
+      "history": [
+        [
+          -60,
+          0.0008
+        ],
+        [
+          -51,
+          -0.0009
+        ],
+        [
+          -43,
+          -0.0008
+        ],
+        [
+          -34,
+          0.0009
+        ],
+        [
+          -26,
+          -0.0001
+        ],
+        [
+          -17,
+          -0.0007
+        ],
+        [
+          -9,
+          0.0007
+        ],
+        [
+          0,
+          0.0
+        ]
+      ],
+      "thresholds": {
+        "watch": null,
+        "warn": null,
+        "critical": 1.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "NEG_BAL_ACCTS",
+      "label": "Negative-balance accounts",
+      "unit": "count",
+      "value": 0.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0005,
+      "history": [
+        [
+          -60,
+          0.0005
+        ],
+        [
+          -51,
+          0.0005
+        ],
+        [
+          -43,
+          0.0007
+        ],
+        [
+          -34,
+          -0.0005
+        ],
+        [
+          -26,
+          0.0007
+        ],
+        [
+          -17,
+          -0.0006
+        ],
+        [
+          -9,
+          -0.0008
+        ],
+        [
+          0,
+          0.0
+        ]
+      ],
+      "thresholds": {
+        "watch": null,
+        "warn": 1.0,
+        "critical": 50.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "ORACLE_DEV",
+      "label": "Oracle deviation",
+      "unit": "%",
+      "value": 0.05,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0005,
+      "history": [
+        [
+          -60,
+          0.0505
+        ],
+        [
+          -51,
+          0.0506
+        ],
+        [
+          -43,
+          0.0496
+        ],
+        [
+          -34,
+          0.0508
+        ],
+        [
+          -26,
+          0.0507
+        ],
+        [
+          -17,
+          0.0501
+        ],
+        [
+          -9,
+          0.0495
+        ],
+        [
+          0,
+          0.05
+        ]
+      ],
+      "thresholds": {
+        "watch": 0.3,
+        "warn": 0.5,
+        "critical": 1.5
+      },
+      "direction": "up"
+    },
+    {
+      "code": "ORACLE_AGE",
+      "label": "Oracle age",
+      "unit": "s",
+      "value": 1.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0004,
+      "history": [
+        [
+          -60,
+          1.0004
+        ],
+        [
+          -51,
+          1.0008
+        ],
+        [
+          -43,
+          0.9994
+        ],
+        [
+          -34,
+          1.0
+        ],
+        [
+          -26,
+          1.0007
+        ],
+        [
+          -17,
+          0.9999
+        ],
+        [
+          -9,
+          1.0003
+        ],
+        [
+          0,
+          1.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 3.0,
+        "warn": 5.0,
+        "critical": 15.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "STBL_PX",
+      "label": "Stablecoin price",
+      "unit": "USD",
+      "value": 1.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0005,
+      "history": [
+        [
+          -60,
+          1.0005
+        ],
+        [
+          -51,
+          0.9996
+        ],
+        [
+          -43,
+          1.0002
+        ],
+        [
+          -34,
+          1.0002
+        ],
+        [
+          -26,
+          0.9993
+        ],
+        [
+          -17,
+          1.0008
+        ],
+        [
+          -9,
+          0.9991
+        ],
+        [
+          0,
+          1.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 0.995,
+        "warn": 0.985,
+        "critical": 0.97
+      },
+      "direction": "down"
+    },
+    {
+      "code": "SETTLE_FAIL_PCT",
+      "label": "Settlement failure rate",
+      "unit": "%",
+      "value": 0.2,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0008,
+      "history": [
+        [
+          -60,
+          0.2008
+        ],
+        [
+          -51,
+          0.2006
+        ],
+        [
+          -43,
+          0.1994
+        ],
+        [
+          -34,
+          0.1994
+        ],
+        [
+          -26,
+          0.2005
+        ],
+        [
+          -17,
+          0.2
+        ],
+        [
+          -9,
+          0.2002
+        ],
+        [
+          0,
+          0.2
+        ]
+      ],
+      "thresholds": {
+        "watch": 1.0,
+        "warn": 2.0,
+        "critical": 10.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "LP_REJECT_PCT",
+      "label": "LP reject rate",
+      "unit": "%",
+      "value": 0.5,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0008,
+      "history": [
+        [
+          -60,
+          0.5008
+        ],
+        [
+          -51,
+          0.4994
+        ],
+        [
+          -43,
+          0.4992
+        ],
+        [
+          -34,
+          0.5002
+        ],
+        [
+          -26,
+          0.5
+        ],
+        [
+          -17,
+          0.5001
+        ],
+        [
+          -9,
+          0.499
+        ],
+        [
+          0,
+          0.5
+        ]
+      ],
+      "thresholds": {
+        "watch": 2.0,
+        "warn": 5.0,
+        "critical": 20.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "NET_EXPOSURE_PCT",
+      "label": "Net exposure (% of limit)",
+      "unit": "% of limit",
+      "value": 20.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": 0.0005,
+      "history": [
+        [
+          -60,
+          19.9995
+        ],
+        [
+          -51,
+          19.9994
+        ],
+        [
+          -43,
+          20.0001
+        ],
+        [
+          -34,
+          19.9994
+        ],
+        [
+          -26,
+          19.9998
+        ],
+        [
+          -17,
+          20.0008
+        ],
+        [
+          -9,
+          19.9993
+        ],
+        [
+          0,
+          20.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 50.0,
+        "warn": 70.0,
+        "critical": 100.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "WDR_QUEUE_RATIO",
+      "label": "Withdrawal queue ratio",
+      "unit": "%",
+      "value": 5.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0003,
+      "history": [
+        [
+          -60,
+          5.0003
+        ],
+        [
+          -51,
+          5.0005
+        ],
+        [
+          -43,
+          4.9992
+        ],
+        [
+          -34,
+          4.9997
+        ],
+        [
+          -26,
+          4.9996
+        ],
+        [
+          -17,
+          4.9994
+        ],
+        [
+          -9,
+          4.9991
+        ],
+        [
+          0,
+          5.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 25.0,
+        "warn": 50.0,
+        "critical": 90.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "INR_BASIS_PCT",
+      "label": "INR/USDT basis",
+      "unit": "%",
+      "value": 0.2,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": 0.001,
+      "history": [
+        [
+          -60,
+          0.199
+        ],
+        [
+          -51,
+          0.2007
+        ],
+        [
+          -43,
+          0.1999
+        ],
+        [
+          -34,
+          0.2009
+        ],
+        [
+          -26,
+          0.2009
+        ],
+        [
+          -17,
+          0.2002
+        ],
+        [
+          -9,
+          0.1992
+        ],
+        [
+          0,
+          0.2
+        ]
+      ],
+      "thresholds": {
+        "watch": 0.5,
+        "warn": 1.0,
+        "critical": 3.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "ORDER_LATENCY_P95",
+      "label": "Order latency p95",
+      "unit": "ms",
+      "value": 80.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0003,
+      "history": [
+        [
+          -60,
+          80.0003
+        ],
+        [
+          -51,
+          80.0
+        ],
+        [
+          -43,
+          79.9991
+        ],
+        [
+          -34,
+          80.0004
+        ],
+        [
+          -26,
+          80.0002
+        ],
+        [
+          -17,
+          80.0001
+        ],
+        [
+          -9,
+          80.0
+        ],
+        [
+          0,
+          80.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 400.0,
+        "warn": 1000.0,
+        "critical": 5000.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "API_ERR_PCT",
+      "label": "API error rate",
+      "unit": "%",
+      "value": 0.3,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0004,
+      "history": [
+        [
+          -60,
+          0.3004
+        ],
+        [
+          -51,
+          0.299
+        ],
+        [
+          -43,
+          0.2991
+        ],
+        [
+          -34,
+          0.3
+        ],
+        [
+          -26,
+          0.2994
+        ],
+        [
+          -17,
+          0.2996
+        ],
+        [
+          -9,
+          0.2999
+        ],
+        [
+          0,
+          0.3
+        ]
+      ],
+      "thresholds": {
+        "watch": 1.0,
+        "warn": 2.0,
+        "critical": 10.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "UPI_FAIL_PCT",
+      "label": "UPI failure rate",
+      "unit": "%",
+      "value": 1.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0004,
+      "history": [
+        [
+          -60,
+          1.0004
+        ],
+        [
+          -51,
+          0.9992
+        ],
+        [
+          -43,
+          0.9991
+        ],
+        [
+          -34,
+          1.0006
+        ],
+        [
+          -26,
+          1.0008
+        ],
+        [
+          -17,
+          1.001
+        ],
+        [
+          -9,
+          0.9997
+        ],
+        [
+          0,
+          1.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 3.0,
+        "warn": 5.0,
+        "critical": 25.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "TICKET_RATE",
+      "label": "Support ticket rate",
+      "unit": "\u00d7 baseline",
+      "value": 1.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0007,
+      "history": [
+        [
+          -60,
+          1.0007
+        ],
+        [
+          -51,
+          1.0008
+        ],
+        [
+          -43,
+          1.0007
+        ],
+        [
+          -34,
+          0.9994
+        ],
+        [
+          -26,
+          0.9992
+        ],
+        [
+          -17,
+          1.0006
+        ],
+        [
+          -9,
+          0.9994
+        ],
+        [
+          0,
+          1.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 2.0,
+        "warn": 3.0,
+        "critical": 8.0
+      },
+      "direction": "up"
+    },
+    {
+      "code": "SENTIMENT",
+      "label": "Social sentiment",
+      "unit": "\u22121\u2026+1",
+      "value": 0.1,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": -0.0008,
+      "history": [
+        [
+          -60,
+          0.1008
+        ],
+        [
+          -51,
+          0.1007
+        ],
+        [
+          -43,
+          0.1009
+        ],
+        [
+          -34,
+          0.1004
+        ],
+        [
+          -26,
+          0.0991
+        ],
+        [
+          -17,
+          0.0994
+        ],
+        [
+          -9,
+          0.0991
+        ],
+        [
+          0,
+          0.1
+        ]
+      ],
+      "thresholds": {
+        "watch": -0.2,
+        "warn": -0.4,
+        "critical": -0.7
+      },
+      "direction": "down"
+    },
+    {
+      "code": "RUMOR_MENTIONS",
+      "label": "Rumor mentions",
+      "unit": "/min",
+      "value": 0.0,
+      "status": "normal",
+      "relevant": false,
+      "trend_per_min": 0.0008,
+      "history": [
+        [
+          -60,
+          -0.0008
+        ],
+        [
+          -51,
+          -0.0009
+        ],
+        [
+          -43,
+          0.0006
+        ],
+        [
+          -34,
+          -0.0006
+        ],
+        [
+          -26,
+          -0.0001
+        ],
+        [
+          -17,
+          0.0006
+        ],
+        [
+          -9,
+          -0.001
+        ],
+        [
+          0,
+          0.0
+        ]
+      ],
+      "thresholds": {
+        "watch": 5.0,
+        "warn": 20.0,
+        "critical": 60.0
+      },
+      "direction": "up"
+    }
+  ],
+  "alerts": [],
+  "actions": [],
+  "templates": [],
+  "controls_active": [],
+  "log": [],
+  "forecast": null,
+  "reminders": []
+}
