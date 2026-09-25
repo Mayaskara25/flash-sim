@@ -39,10 +39,10 @@ def test_api_actions_and_errors():
     state = post("/clock", {"op": "jump", "t": 900})
     assert state.sim.t >= 900
     assert state.actions
-    action = next(a for a in state.actions if a.id == "M1.4")
+    action = next(a for a in state.actions if a.id == "M2.2")
     assert "rationale" in post(f"/actions/{action.id}/decide", {"decision": "approve", "actor": "IC"}, 422)
     state = post(f"/actions/{action.id}/decide", {"decision": "approve", "actor": "IC", "rationale": "Capped new leverage"})
-    assert any(c.control_id == "leverage_cap" for c in state.controls_active)
+    assert any(c.control_id == "reduce_only" for c in state.controls_active)
     assert "already decided" in post(f"/actions/{action.id}/decide", {"decision": "approve", "actor": "IC", "rationale": "again"}, 409)
     state = post("/notes", {"actor": "TL", "text": "Engine verified"})
     assert state.log[-1].type == "note"

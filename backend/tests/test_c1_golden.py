@@ -67,3 +67,13 @@ def test_identical_runs_have_identical_journals():
         at(session, wall, 15)
         return [e.model_dump() for e in session.journal.entries]
     assert replay() == replay()
+
+
+def test_live_priority_surfaces_reduce_only_at_critical():
+    wall = [0.0]
+    session = IncidentSession(lambda: wall[0])
+    session.start("C1", 8)
+    dto = at(session, wall, 14 + 40 / 60)
+    visible_ic = sorted((a for a in dto.actions if a.status == "proposed" and a.role == "IC"),
+                        key=lambda a: a.priority)[:3]
+    assert "M2.2" in [a.id for a in visible_ic]
