@@ -3,9 +3,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { incidentApi } from './api'
 import { FIXTURES, SEQUENCE, SUMMARY_C1 } from './fixtures'
 import type {
-  ActionDecideBody, AlertAckBody, CatalogueDTO, ClockBody, IncidentStateDTO,
-  IncidentSummary, InjectBody, LiquidationReviewBody, NotesBody, PendingConfirmBody,
-  ScenarioSummary, SeverityBody, StartBody, TemplateDismissBody, TemplateSendBody,
+  ActionDecideBody, AlertAckBody, CatalogueDTO, ClockBody, CopilotBody, CopilotReply,
+  ExecutionDecisionBody, IncidentStateDTO, IncidentSummary, InjectBody,
+  LiquidationReviewBody, NotesBody, PendingConfirmBody, QueueRecordBody, ScenarioSummary,
+  SeverityBody, StartBody, TemplateDismissBody, TemplateSendBody,
 } from './types'
 
 export type IncidentActions = {
@@ -20,6 +21,10 @@ export type IncidentActions = {
   setSeverity: (body: SeverityBody) => Promise<void>
   confirmPending: (body: PendingConfirmBody) => Promise<void>
   reviewLiquidation: (body: LiquidationReviewBody) => Promise<void>
+  decideExecution: (id: string, body: ExecutionDecisionBody) => Promise<void>
+  recordQueueEvent: (id: string, body: QueueRecordBody) => Promise<void>
+  copilot: (body: CopilotBody) => Promise<CopilotReply>
+  reportUrl: () => string
   inject: (body: InjectBody) => Promise<void>
   nextFixture: () => Promise<void>
   clearError: () => void
@@ -142,6 +147,9 @@ export function useIncident(): IncidentHook {
     clock: mockAdvance, ackAlert: mockAdvance, decideAction: mockAdvance,
     sendTemplate: mockAdvance, dismissTemplate: mockAdvance, addNote: mockAdvance,
     setSeverity: mockAdvance, confirmPending: mockAdvance, reviewLiquidation: mockAdvance,
+    decideExecution: mockAdvance, recordQueueEvent: mockAdvance,
+    copilot: async () => ({ answer: 'Sample fixture mode. Start the live simulation for a modelled P2 briefing.', spoken: 'Sample fixture mode.', first_priority: 'Start the live simulation.', why: [], next_step: 'Select Black Tuesday.', facts: {} }),
+    reportUrl: incidentApi.reportUrl,
     clearError: () => setError(null),
   } : {
     start: (body) => run(() => incidentApi.start(body)),
@@ -155,6 +163,10 @@ export function useIncident(): IncidentHook {
     setSeverity: (body) => run(() => incidentApi.setSeverity(body)),
     confirmPending: (body) => run(() => incidentApi.confirmPending(body)),
     reviewLiquidation: (body) => run(() => incidentApi.reviewLiquidation(body)),
+    decideExecution: (id, body) => run(() => incidentApi.decideExecution(id, body)),
+    recordQueueEvent: (id, body) => run(() => incidentApi.recordQueueEvent(id, body)),
+    copilot: (body) => incidentApi.copilot(body),
+    reportUrl: incidentApi.reportUrl,
     inject: (body) => run(() => incidentApi.inject(body)),
     nextFixture,
     clearError: () => { mutationError.current = false; setError(null) },

@@ -215,6 +215,78 @@ export type Forecast = {
   label: 'Simulated projection — not a market forecast'
 }
 
+export type ExecutionStatus = 'flagged' | 'valid' | 'investigate' | 'escalated'
+export type ExecutionView = {
+  id: string
+  cluster_id: string
+  trader_id: string
+  asset: string
+  side: 'LONG' | 'SHORT'
+  leverage: number
+  modelled_threshold: number
+  observed_execution: number
+  deviation_pct: number
+  execution_delay_ms: number
+  market_price: number
+  liquidity_condition: string
+  reasons: string[]
+  status: ExecutionStatus
+  label: string
+}
+export type InvestigationCluster = { id: string; asset: string; flagged_count: number; executions: ExecutionView[]; why: string }
+export type ActionQueueItem = {
+  id: string
+  band: 'NOW' | 'NEXT' | 'MONITOR'
+  owner: string
+  role: Role
+  text: string
+  reason: string
+  status: string
+  eta: string | null
+  button: 'OPEN' | 'RUN' | 'APPROVE' | null
+  ref: string | null
+  priority: number
+}
+export type TeamMember = { id: string; role: Role; title: string; status: string; responsibility: string }
+export type WhyAlert = {
+  signal: string
+  value: number
+  baseline: number
+  watch: number | null
+  warn: number | null
+  critical: number | null
+  unit: string
+  change_pct: number | null
+  conclusion: string
+}
+export type CommandDelta = { elapsed_s: number; since_label: string; lines: string[] }
+export type CommandBrief = {
+  risk_level: 'NORMAL' | 'WATCH' | 'ACTION' | 'CRITICAL'
+  cascade_score: number
+  incident_mode: boolean
+  reasons: string[]
+  first_priority: string
+  why_first: string
+  next_step: string
+  liquidation_rate: number
+  liquidation_baseline: number
+  near_liquidation: number
+  liquidity_change: number
+  abnormal_liquidations: number
+  lar: number
+  exposure_pct: number
+  px_chg: number
+  ticket_rate: number
+  largest_cluster: string | null
+  cluster: InvestigationCluster | null
+  queue: ActionQueueItem[]
+  team: TeamMember[]
+  delta: CommandDelta | null
+  why_alerts: WhyAlert[]
+  label: string
+}
+export type CopilotReply = { answer: string; spoken: string; first_priority: string; why: string[]; next_step: string; facts: Record<string, number | string | null> }
+
 export type IncidentStateDTO = {
   sim: SimBlock
   severity: SeverityBlock
@@ -228,6 +300,7 @@ export type IncidentStateDTO = {
   log: LogEntry[]
   forecast: Forecast | null
   reminders: string[]
+  command?: CommandBrief | null
 }
 
 // 7. Endpoints: request bodies + misc response shapes
@@ -245,6 +318,9 @@ export type NotesBody = { actor: Role; text: string }
 export type SeverityBody = { sev: SevLevel; actor: Role; reason: string }
 export type PendingConfirmBody = { actor: 'IC' }
 export type LiquidationReviewBody = { verdict: LiqReview; actor: Role; rationale: string }
+export type CopilotBody = { question: string }
+export type ExecutionDecisionBody = { decision: 'valid' | 'investigate' | 'escalated'; actor: 'TL'; rationale?: string | null }
+export type QueueRecordBody = { actor: 'TL'; event: 'opened' | 'run' | 'reviewed'; rationale?: string | null }
 export type InjectBody = { event: 'stablecoin_dip' | 'oracle_stale' | 'api_overload' | 'rumour' }
 
 export type ErrorDetail = { detail: string }

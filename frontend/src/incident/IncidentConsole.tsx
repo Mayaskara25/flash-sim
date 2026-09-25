@@ -5,13 +5,20 @@ import { useIncident } from './useIncident'
 import { shortcutFor } from './shortcuts'
 import { Toasts } from './Toasts'
 import { roleFocus } from './roleFocus'
-import type { Role } from './types'
+import type { ActionQueueItem, Role } from './types'
 import { ActionList } from './components/ActionList'
 import { IncidentLog } from './components/IncidentLog'
 import { RoleSwitcher, type ViewRole } from './components/RoleSwitcher'
 import { SeverityBanner } from './components/SeverityBanner'
 import { SignalGrid } from './components/SignalGrid'
 import { TemplatePanel } from './components/TemplatePanel'
+import { RiskBrief } from './components/RiskBrief'
+import { P2ActionQueue } from './components/P2ActionQueue'
+import { AICopilot } from './components/AICopilot'
+import { LiquidationInvestigator } from './components/LiquidationInvestigator'
+import { TeamStatus } from './components/TeamStatus'
+import { IncidentTimeline } from './components/IncidentTimeline'
+import { IncidentReport } from './components/IncidentReport'
 
 function initialRole(): ViewRole {
   try {
@@ -26,6 +33,7 @@ export function IncidentConsole() {
   const { state, actions, busy, mock, stale, error, scenarios } = incident
   const [role, setRole] = useState<ViewRole>(initialRole)
   const [help, setHelp] = useState(false)
+  const [investigating, setInvestigating] = useState(false)
   const changeRole = (value: ViewRole) => { setRole(value); try { localStorage.setItem('incident-role', value) } catch { /* Optional preference. */ } }
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -44,14 +52,32 @@ export function IncidentConsole() {
   }, [actions, busy, help, state?.sim.running, state?.sim.started])
   if (!state) return <main className="min-h-screen bg-bg p-8 text-sm text-muted"><h1 className="text-base font-bold text-ink">Flash-crash incident console</h1><p className="mt-3">{error ? 'Unable to load incident state.' : 'Loading incident state…'}</p><Toasts error={error} onDismiss={actions.clearError} /></main>
   const messageActor: Role = role === 'All' ? 'CS' : role
+  const command = state.command ?? null
+  const actOnQueue = (item: ActionQueueItem) => {
+    if (item.id === 'p2.investigate' && command?.cluster) {
+      void actions.recordQueueEvent(item.id, { actor: 'TL', event: 'opened' }).then(() => setInvestigating(true)).catch(() => {})
+      return
+    }
+    const event: 'run' | 'reviewed' = item.button === 'RUN' ? 'run' : 'reviewed'
+    void actions.recordQueueEvent(item.id, { actor: 'TL', event }).then(() => {
+      if (item.button === 'APPROVE') document.getElementById('response-actions')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }).catch(() => {})
+  }
   return <div className="min-h-screen bg-bg text-ink">
     <header className="flex flex-wrap items-center justify-between gap-2 border-b border-line bg-white px-4 py-2 md:px-6"><div><div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">MochaTrade / Operations</div><h1 className="text-base font-bold tracking-tight">Flash-crash incident console</h1></div><div className="flex gap-2">{state.severity.state === 'RESOLVED' && <Link to={`/summary${mock ? '?mock=1' : ''}`} className="bg-navy px-3 py-1.5 text-xs font-semibold text-white">View summary ↗</Link>}<Link to="/analyst/overview" className="border border-line px-3 py-1.5 text-xs font-semibold text-navy hover:bg-slate-50">Open analyst views ↗</Link></div></header>
     <SeverityBanner state={state} scenarios={scenarios} actions={actions} busy={busy} mock={mock} stale={stale} />
     <Toasts error={error} onDismiss={actions.clearError} />
     <main className="grid gap-3 p-3 md:p-4 xl:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
-      <SignalGrid signals={state.signals} alerts={state.alerts} />
+      {command && <div className="xl:col-span-2"><RiskBrief command={command} onInvestigate={() => { const item = command.queue.find((row) => row.id === 'p2.investigate'); if (item) actOnQueue(item); else setInvestigating(true) }} /></div>}
       <div className="min-w-0 space-y-3">
-        <section className="border border-line bg-white p-3 md:p-4" aria-label="Next actions">
+        {command && <P2ActionQueue items={command.queue} busy={busy} onAction={actOnQueue} />}
+        {command?.incident_mode ? <details className="border border-line bg-white p-3"><summary className="cursor-pointer text-xs font-bold uppercase tracking-[0.13em] text-navy">Detailed analysis</summary><div className="mt-3"><SignalGrid signals={state.signals} alerts={state.alerts} /></div></details> : <SignalGrid signals={state.signals} alerts={state.alerts} />}
+        {command && <AICopilot onAsk={(question) => actions.copilot({ question })} />}
+      </div>
+      <div className="min-w-0 space-y-3">
+        {command && <div className="grid gap-3 lg:grid-cols-2"><TeamStatus team={command.team} /><IncidentTimeline log={state.log} /></div>}
+        {command && <IncidentReport state={state} command={command} reportUrl={actions.reportUrl()} />}
+        <section id="response-actions" className="border border-line bg-white p-3 md:p-4" aria-label="Next actions">
           <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-xs font-bold uppercase tracking-[0.13em]">Next actions</h2><RoleSwitcher value={role} onChange={changeRole} /></div>
           <p className="mt-2 text-xs text-muted">{role === 'All' ? 'Three-person response team' : roleLabel[role]} · human approval required for every control and message.</p>
           <p className="mt-1 border-l-2 border-navy bg-slate-50 px-2 py-1.5 text-[11px] leading-snug"><strong>{roleFocus(state.sim.t, role).phase}:</strong> {roleFocus(state.sim.t, role).text}</p>
@@ -63,6 +89,7 @@ export function IncidentConsole() {
         <IncidentLog log={state.log} alerts={state.alerts} role={role} busy={busy} onAck={(id, actor) => actions.ackAlert(id, { actor })} onNote={(text, actor) => actions.addNote({ actor, text })} onReview={(verdict, rationale) => actions.reviewLiquidation({ verdict, actor: 'IC', rationale })} />
       </div>
     </main>
+    {investigating && command?.cluster && <LiquidationInvestigator cluster={command.cluster} busy={busy} onClose={() => setInvestigating(false)} onDecision={(id, decision) => void actions.decideExecution(id, { decision, actor: 'TL' }).catch(() => {})} />}
     {mock && <div className="fixed bottom-3 left-3 z-30 flex items-center gap-2 border border-amber-400 bg-amber-50 px-2 py-1.5 text-[11px] shadow"><span>Sample fixture mode</span><button type="button" onClick={() => void actions.nextFixture()} className="font-semibold text-navy underline">Next fixture</button><button type="button" onClick={() => void actions.inject({ event: 'stablecoin_dip' })} className="font-semibold text-navy underline">Emergency fixture</button></div>}
     <button type="button" className="fixed bottom-3 right-3 z-30 border border-line bg-white px-2 py-1 text-xs font-bold shadow" onClick={() => setHelp(true)} aria-label="Keyboard shortcuts">?</button>
     {help && <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) setHelp(false) }}><div role="dialog" aria-modal="true" aria-label="Keyboard shortcuts" className="w-full max-w-sm bg-white p-5 text-sm shadow-xl"><h2 className="font-bold">Keyboard shortcuts</h2><p className="mt-3 leading-7">1 IC · 2 TL · 3 CS · 0 All<br />A approve top action · S skip top action<br />N add a note · Space pause or resume<br />? show shortcuts · Esc close</p><button type="button" onClick={() => setHelp(false)} className="mt-4 border border-line px-3 py-1.5 text-xs font-semibold">Close</button></div></div>}
