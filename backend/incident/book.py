@@ -14,12 +14,22 @@ research ``MAINTENANCE_BUFFER``):
   margin is wiped out, so an orderly liquidation leaves **no shortfall**.
 - Shortfall (bad debt, paid by the fund) appears only when the fill slips
   or gaps past the wipe-out point (``1.0/lev``): ``fill = liq`` moved
-  further adverse by ``slippage × |tick move|``. ``slippage`` is therefore
-  an *execution-gap* factor (fill trails the market by that many ticks'
-  worth of movement — tens of ticks in a cascading market), not a fee.
-  Gentle phases produce liquidations with zero shortfall; steep phases
-  produce bad debt. ``NEG_BAL_ACCTS`` counts only shortfall-carrying
-  liquidations in the last 10 min (a real count, not a proxy).
+  further adverse by ``slippage × |cumulative drawdown|`` — an *execution
+  depth* factor, not a fee or an instantaneous-tick multiplier. The market
+  gets thinner the deeper a crash goes (liquidity is consumed by the
+  cascade itself), so fills slip further behind the trigger price the
+  deeper the book has already fallen, regardless of any one tick's local
+  slope. This was previously modelled as ``slippage × |tick move|``
+  (an instantaneous 2 s delta extrapolated by a ~40-tick multiplier), which
+  spiked bad debt into a one-tick cliff whenever a scripted PX segment
+  was briefly steeper than its neighbours — the cliff tracked the price
+  *script's* local slope, not the crash's actual depth. Depth-based slip
+  keeps shortfall a smooth, monotonic function of how far the crash has
+  gone, so gentle early phases produce liquidations with little or no
+  shortfall and the drain accelerates as the crash deepens (SPEC's M2
+  "waterfall" narrative) instead of jumping in a single tick.
+  ``NEG_BAL_ACCTS`` counts only shortfall-carrying liquidations in the
+  last 10 min (a real count, not a proxy).
 
 Conventions (all per the H1 handoff):
 - The book is built once per scenario with ``generate_portfolio`` at start
@@ -194,8 +204,16 @@ class CrashBook:
     def current_prices(self, px_chg: float) -> np.ndarray:
         return self.starts * (1.0 + float(px_chg) * self.betas)
 
-    def _shortfall(self, idx: np.ndarray, liq: np.ndarray, tick_move: float) -> np.ndarray:
-        slip = self.slippage * abs(float(tick_move))
+    def _shortfall(self, idx: np.ndarray, liq: np.ndarray, px_chg: float) -> np.ndarray:
+        """Shortfall for newly-liquidated positions ``idx``.
+
+        ``slip`` scales with the crash's *cumulative* depth (``px_chg``,
+        the scenario asset's fractional move since start), not with any
+        single tick's instantaneous move — see the module docstring for why
+        (a depth-based, path-independent slip is what keeps bad debt a
+        smooth function of the crash rather than a one-tick cliff).
+        """
+        slip = self.slippage * abs(float(px_chg))
         fill = np.where(self.is_long[idx], liq[idx] * (1.0 - slip), liq[idx] * (1.0 + slip))
         loss = np.where(
             self.is_long[idx],
@@ -208,12 +226,16 @@ class CrashBook:
         self,
         t: int,
         px_chg: float,
-        tick_move: float,
+        tick_move: float = 0.0,
         lar_mult: float = 1.0,
         paused: bool = False,
         maintenance_mult: float = 1.0,
         max_leverage: float | None = None,
     ) -> LiqOutcome:
+        # `tick_move` (the single-tick price delta) is accepted for call-site
+        # compatibility but no longer used: shortfall is driven by the
+        # crash's cumulative depth (`px_chg`), not the local tick slope
+        # (see `_shortfall`).
         liq = self._liq_thresholds(maintenance_mult, max_leverage)
         px = self.current_prices(px_chg)
         survivors = ~self.liquidated
@@ -239,7 +261,7 @@ class CrashBook:
         self.n_liquidated_raw += len(new_idx)
         if len(new_idx):
             self.n_short_liq += int((~self.is_long[new_idx]).sum())
-        per_pos = self._shortfall(new_idx, liq, tick_move) if len(new_idx) else np.zeros(0)
+        per_pos = self._shortfall(new_idx, liq, px_chg) if len(new_idx) else np.zeros(0)
         raw_shortfall = float(per_pos.sum())
         raw_neg = int((per_pos > 0).sum())
         scale = self.book_scale * float(lar_mult)

@@ -55,8 +55,14 @@ KNOB_MAINT = "sim.maintenance_mult"
 KNOB_TOPUP = "sim.fund_topup_pct"
 
 #: Reduce-only dampening: further negative moves past the approval level are
-#: scaled by this (cascade selling removed). See SCHEMA.md.
-EXPOSURE_DAMPEN = 0.4
+#: scaled by this (cascade selling removed). See SCHEMA.md. Depth-based
+#: shortfall (book.py) is convex in cumulative drawdown, so once the
+#: approval point already sits past the fund's danger depth, a mild
+#: dampening (previously 0.4) still lets enough further decline through to
+#: keep crossing survivor thresholds and draining the fund toward the same
+#: EMERGENCY outcome reduce-only is meant to avert. 0.1 (90% of further
+#: decline removed) is closer to the spec's "cascade selling removed".
+EXPOSURE_DAMPEN = 0.1
 
 
 def _tick_index(t: int) -> int:

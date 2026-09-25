@@ -29,9 +29,11 @@ interpolated**; outside the keyframe range the edge value holds (clamped).
 
 - `PX` — **cumulative fractional change** of the scenario asset vs its start
   (e.g. `-0.06` = −6%). Required; drives the book, `PX` and `PX_CHG_5M`.
-  Keep the pre-roll **flat** (repeat the opening value, e.g.
-  `[[-120, 0], [0, 0], …]`): any pre-roll ramp generates liquidations before
-  T+0 and escalates a calm market.
+  Keep the pre-roll **flat until the last ~30 s** (repeat the opening value,
+  e.g. `[[-120, 0], [-30, 0], [0, -0.006], …]`): a ramp that starts much
+  earlier than that generates enough liquidations before T+0 to escalate a
+  calm market past watch (C1's own T-0:30 kick-off is small enough that
+  every pre-roll signal still stays at watch or below through T+0).
 - Any other catalogue code (`TICKET_RATE`, `SENTIMENT`, `STBL_PX`,
   `ORACLE_DEV`, …) — scripted path for that signal.
 - Any catalogue code **not** listed sits at its catalogue baseline plus noise.
@@ -44,8 +46,8 @@ interpolated**; outside the keyframe range the edge value holds (clamped).
 | `avg_leverage` | 14.7 | Center of the leverage-bucket distribution |
 | `long_ratio` | 0.72 | Share of longs (crash hurts longs) |
 | `book_scale` | 1.0 | Multiplies observed liquidations **and** expected ones, so LAR is scale-invariant. Keep 1.0: raising it breaks LAR ≈ 1 on market moves |
-| `insurance_fund_usd` | 135000.0 | Starting fund. Calibrated so C1 no-action crosses 25% at ~T+24 while the reduce-only branch stays above 60% (H2's resolve needs fund above warn) |
-| `slippage` | 40.0 | **Execution-gap factor**, not a fee: fill trails the market by this many ticks' worth of movement (`fill = liq` moved adverse by `slippage × |tick move|`). Tens of ticks: liquidations execute minutes behind in a cascading market. Gentle phases produce zero shortfall (headroom `0.2/lev` covers the slip); steep phases produce bad debt. This decoupling lets LIQ_RATE (counts) and fund drain (steepness) calibrate independently |
+| `insurance_fund_usd` | 135000.0 | Starting fund. Calibrated so C1 no-action crosses 25% between T+20 and T+26 while the reduce-only branch never drops below 25% (floors around 34%) |
+| `slippage` | 0.207 | **Execution-depth factor**, not a fee or a per-tick multiplier: `fill = liq` moved adverse by `slippage × |cumulative drawdown|` (the scenario asset's fractional move since start, not any single tick's delta). The book gets thinner the deeper a crash goes, so fills slip further behind the trigger price the deeper the crash currently is. Gentle/shallow phases produce zero shortfall (headroom `0.2/lev` covers the slip until depth passes roughly `0.2/(lev × slippage)`); the drain accelerates smoothly as the crash deepens. This was previously `slippage × |tick move|` (an instantaneous 2 s delta extrapolated by a large tick-count multiplier); that model spiked bad debt into a one-tick cliff whenever a scripted PX segment was briefly steeper than its neighbours, because it tracked the price *script's* local slope rather than the crash's actual depth |
 
 Liquidation math (see `book.py`): sticky crossings of
 `liq = entry × (1 ∓ 0.8/lev)` (`INCIDENT_BUFFER = 0.8 < 1`, deliberately not
@@ -61,9 +63,11 @@ against book-tail lumpiness). The window **maximum** drawdown (not the
 instantaneous drop) is used so the expectation covers the same trailing 60 s
 the rolling observed count does — an instantaneous diff phantom-spikes LAR on
 every recovery onset. `BAD_DEBT_RATE` = rolling-60 s shortfall as % of start
-fund; `ADL_COUNT` increments when shortfall would push the fund below 0
-(fund floors at 0); `NEG_BAL_ACCTS` = rolling-10-min liquidations with
-shortfall > 0 (a real count: most liquidations carry none).
+fund, driven by the depth-based slip above so it turns on gradually as the
+crash deepens rather than jumping in a single tick; `ADL_COUNT` increments
+when shortfall would push the fund below 0 (fund floors at 0);
+`NEG_BAL_ACCTS` = rolling-10-min liquidations with shortfall > 0 (a real
+count: most liquidations carry none).
 
 Known limitation: unpausing a liquidation pause flushes the backlog while the
 price-based expectation is ~0, spiking LAR. C1 never pauses; H8 pause
@@ -85,7 +89,7 @@ Applied by `SignalGenerator.step` **after** generation, with linear ramp over
 
 | Knob effect | Semantics |
 |---|---|
-| `sim.new_exposure = 0` (set) | Reduce-only: further **declines** past the approval-level price are scaled × **0.4** (cascade selling removed); recoveries pass through |
+| `sim.new_exposure = 0` (set) | Reduce-only: further **declines** past the approval-level price are scaled × **0.1** (`EXPOSURE_DAMPEN` in `signals.py` — cascade selling removed); recoveries pass through. With depth-based shortfall, the approval point is often already past the fund's danger depth, so the dampening has to nearly halt further decline (not just slow it) for reduce-only to actually hold the fund above 25% |
 | `sim.liquidations_paused = 1` (set) | Crossings are **queued**, not executed (`LIQ_RATE` reads 0 meanwhile). On unpause the queue flushes over ~60 s and shortfall is computed at the then-current (worse) prices — pausing is a trade-off (SPEC §9.4) |
 | `sim.max_leverage = X` (set) | Survivors' thresholds recomputed with `lev := min(lev, X)` (wider buffer, fewer new liquidations) |
 | `sim.maintenance_mult = m` (set) | Buffer `0.8` → `0.8 × m` for survivors (`m > 1` delays liquidation; ramps linearly). Never creates bad debt by itself (stays below 1.0 for sane `m`) |
@@ -94,15 +98,26 @@ Applied by `SignalGenerator.step` **after** generation, with linear ramp over
 
 ## C1 calibration reference (tolerances, no-action run, seed 42)
 
-- Pre-roll (T−120…T+0): dead calm — `LIQ_RATE`/`BAD_DEBT_RATE`/`NEG_BAL_ACCTS`
-  all 0, fund 100%, every signal normal (H2 stays NORMAL).
-- T+0: crash starts (flat pre-roll before it). `LIQ_RATE` crosses 100/min
-  ~T+3 (WARNING), 300/min ~T+13 (CRITICAL, 336/min at T+14 with fund intact).
-- T+6: `TICKET_RATE` ≈ 4× (I1). LAR stays 0.7–1.5 throughout (market-driven;
-  exactly 1.00 at most markers — the denominator counts thresholds exactly).
-- No-action: waterfall T+20–26 drains the fund through 25% at ~T+24
-  (SEV-1 branch, stays EMERGENCY — the fund never recovers). Reduce-only
-  (H3 effects) approved at T+18: dampened ticks fall below the shortfall
-  headroom, fund stays at ~100%, all signals below warn from ~T+35, so H2
-  proposes resolve after 15 min and IC confirmation resolves ~T+50.
+- Pre-roll (T−2:00…T−0:30): dead calm — `LIQ_RATE`/`BAD_DEBT_RATE`/
+  `NEG_BAL_ACCTS` all 0, fund 100%, every signal normal. From T−0:30 PX
+  starts falling (by design), so a handful of liquidations trickle in
+  before T+0, but every signal stays at watch or below through T+0
+  (H2 stays NORMAL/WATCH).
+- T+0..T+3: `LIQ_RATE` crosses 100/min by T+2; `PX_CHG_5M` reaches -5%
+  (WARNING) within T+0..T+3.
+- T+6: `TICKET_RATE` ≈ 4× (I1); fund ≈ 90-99% (gradual drain has started,
+  `BAD_DEBT_RATE` > 0 from ~T+3, not a cliff).
+- T+14: `LIQ_RATE` 350-500/min (CRITICAL), fund drained to ~35-45%. LAR
+  stays 0.7-1.5 throughout (market-driven; exactly 1.00 at most markers —
+  the denominator counts thresholds exactly).
+- No-action: waterfall T+20-26 drains the fund through 25% (SEV-1 branch
+  via the fund hard override; the fund does not recover on its own).
+  Reduce-only (H3 effects) approved at T+18: the depth-based shortfall
+  model means T+18 is often already past the fund's danger depth, so the
+  dampening (`EXPOSURE_DAMPEN = 0.1`) has to nearly halt further decline;
+  the fund floors around 34% (never below 25%), `LIQ_RATE` < 50/min well
+  before T+45, all signals but `INS_FUND_PCT` clear below warn from ~T+35
+  (`INS_FUND_PCT` itself settles below the 60% warn line without a top-up —
+  H2's resolve rule special-cases it, PLAN §3 decision #13), so H2 proposes
+  resolve after 15 min of that and IC confirmation resolves by ~T+58.
 - Full 3600 s replay (1861 ticks) runs in < 2 s (vectorised numpy, 10k book).
