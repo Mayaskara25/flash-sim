@@ -54,7 +54,9 @@ class IncidentSession:
         self.severity = None
         self.tags = []
         self.forecast = None
-        self.forecaster = None
+        from .forecast import compute
+        self.forecaster = compute
+        self.what_ifs = {}
         self.last_customer_comm_t = None
         self.peaks: dict[str, tuple[float, int]] = {}
         self.expired_controls: list[str] = []
@@ -153,8 +155,8 @@ class IncidentSession:
                 self.peaks[sig.code] = (value, t)
         self._refresh_proposals()
         self._refresh_templates(bool(transitions))
-        if self.forecaster is not None and t >= 0 and t % 60 == 0:
-            self.forecast = self.forecaster(self)
+        if self.forecaster is not None and t >= 0 and t % 10 == 0:
+            self.forecast, self.what_ifs = self.forecaster(self)
 
     def _refresh_proposals(self) -> None:
         ctx = ProposalContext(active_tags=tuple(x.tag for x in self.tags if x.active),
@@ -215,6 +217,8 @@ class IncidentSession:
                 history=history, thresholds=Thresholds(watch=sig.watch, warn=sig.warn, critical=sig.critical),
                 direction=sig.direction))
         signals.sort(key=lambda s: (not s.relevant, {"critical": 0, "warn": 1, "watch": 2, "normal": 3}[s.status], s.code))
+        for action in self.actions.values():
+            action.what_if = self.what_ifs.get(action.control_id) if action.status == "proposed" else None
         reminders = []
         if pending:
             reminders.append(f"IC confirmation needed: {pending.kind}")
