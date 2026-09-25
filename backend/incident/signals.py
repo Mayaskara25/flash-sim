@@ -180,10 +180,13 @@ class SignalGenerator:
         self._last_px_eff = px_eff
 
         lar_mult = float(self.scenario.fault_value("LAR_MULT", t, 1.0))
+        # A leverage cap applies to *new* positions. The replay book contains
+        # positions opened before the incident, so retroactively capping their
+        # leverage would erase the cascade and falsify the C1 run.
         outcome = self.book.step(
             t, px_eff, tick_move,
             lar_mult=lar_mult, paused=paused,
-            maintenance_mult=maint, max_leverage=max_lev,
+            maintenance_mult=maint, max_leverage=None,
         )
 
         # Optional scripted fund drain (SCHEMA.md). C1 does not use it; the
