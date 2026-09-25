@@ -22,11 +22,20 @@ const BASE = '/api/incident'
 async function j<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     headers: { 'Content-Type': 'application/json' },
+    cache: 'no-store',
     ...init,
   })
   if (!res.ok) {
     const text = await res.text()
-    throw new Error(text || res.statusText)
+    let detail = text || res.statusText
+    try {
+      const parsed: unknown = JSON.parse(text)
+      if (parsed && typeof parsed === 'object' && 'detail' in parsed) {
+        const value = (parsed as { detail: unknown }).detail
+        detail = typeof value === 'string' ? value : JSON.stringify(value)
+      }
+    } catch { /* Non-JSON errors still carry their response text. */ }
+    throw new Error(detail)
   }
   return res.json() as Promise<T>
 }
@@ -39,13 +48,13 @@ export const incidentApi = {
   reset: () => j<IncidentStateDTO>('/reset', { method: 'POST', body: '{}' }),
   state: () => j<IncidentStateDTO>('/state'),
   ackAlert: (id: string, body: AlertAckBody) =>
-    j<IncidentStateDTO>(`/alerts/${id}/ack`, { method: 'POST', body: JSON.stringify(body) }),
+    j<IncidentStateDTO>(`/alerts/${encodeURIComponent(id)}/ack`, { method: 'POST', body: JSON.stringify(body) }),
   decideAction: (id: string, body: ActionDecideBody) =>
-    j<IncidentStateDTO>(`/actions/${id}/decide`, { method: 'POST', body: JSON.stringify(body) }),
+    j<IncidentStateDTO>(`/actions/${encodeURIComponent(id)}/decide`, { method: 'POST', body: JSON.stringify(body) }),
   sendTemplate: (id: string, body: TemplateSendBody) =>
-    j<IncidentStateDTO>(`/templates/${id}/send`, { method: 'POST', body: JSON.stringify(body) }),
+    j<IncidentStateDTO>(`/templates/${encodeURIComponent(id)}/send`, { method: 'POST', body: JSON.stringify(body) }),
   dismissTemplate: (id: string, body: TemplateDismissBody) =>
-    j<IncidentStateDTO>(`/templates/${id}/dismiss`, { method: 'POST', body: JSON.stringify(body) }),
+    j<IncidentStateDTO>(`/templates/${encodeURIComponent(id)}/dismiss`, { method: 'POST', body: JSON.stringify(body) }),
   addNote: (body: NotesBody) => j<IncidentStateDTO>('/notes', { method: 'POST', body: JSON.stringify(body) }),
   setSeverity: (body: SeverityBody) =>
     j<IncidentStateDTO>('/severity', { method: 'POST', body: JSON.stringify(body) }),
