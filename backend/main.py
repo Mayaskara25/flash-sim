@@ -6,6 +6,7 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
+from incident.api import router as incident_router
 from simulation.engine import ENGINE
 
 app = FastAPI(
@@ -21,6 +22,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(incident_router, prefix="/incident")
 
 
 class SimParams(BaseModel):
