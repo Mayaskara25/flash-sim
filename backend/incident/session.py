@@ -167,8 +167,21 @@ class IncidentSession:
                               last_customer_comm_t=self.last_customer_comm_t,
                               expired_controls=tuple(self.expired_controls),
                               unacknowledged_alerts=any(c.acknowledged_by is None for c in self.alert_manager.cards.values()))
-        for row in propose(ctx):
-            if row.id not in self.actions:
+        current = propose(ctx)
+        current_ids = {row.id for row in current}
+        for action in self.actions.values():
+            if action.status == "proposed" and action.id not in current_ids:
+                action.status = "expired"
+        for row in current:
+            if row.id in self.actions:
+                action = self.actions[row.id]
+                if action.status == "expired":
+                    action.status = "proposed"
+                    action.proposed_t = self.frame.t
+                if action.status == "proposed":
+                    action.priority = row.priority
+                    action.rationale_hint = row.rationale_hint
+            else:
                 self.actions[row.id] = ActionView(id=row.id, tag=row.tag, role=row.role,
                     text=row.text, priority=row.priority, control_id=row.control_id,
                     template_id=row.template_id, status="proposed", proposed_t=self.frame.t,
