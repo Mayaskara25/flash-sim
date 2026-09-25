@@ -2,17 +2,17 @@
 
 from __future__ import annotations
 
-from incident.book import CrashBook
+from incident.book import CrashBook, lar_ratio
 from incident.scenario_loader import BookSpec, ScenarioLoader, ScenarioSpec
 
 
-def _scenario(px_drop: float = -0.06, lar_mult: float = 1.0, fund: float = 135_000.0) -> ScenarioLoader:
+def _scenario(px_drop: float = -0.06, lar_mult: float = 1.0, fund: float = 135_000.0, capacity: float | None = None) -> ScenarioLoader:
     # slippage is a depth-based execution-gap factor now (book.py:
     # `slip = slippage * |cumulative drawdown|`), not a tick-delta
     # multiplier; 0.3 is a representative C1-scale value.
     spec = ScenarioSpec(
         id="T", name="t", description="t", duration_s=900, seed=42, asset="NVDA",
-        book=BookSpec(insurance_fund_usd=fund, slippage=0.3),
+        book=BookSpec(insurance_fund_usd=fund, slippage=0.3, liq_capacity_per_min=capacity),
         tracks={"PX": [[-120, 0.0], [0, 0.0], [240, px_drop], [900, px_drop]]},
         faults={"LAR_MULT": [[-120, lar_mult]]},
     )
@@ -27,26 +27,14 @@ def _run(scenario: ScenarioLoader, upto: int = 300, paused: bool = False):
     lar_kf = scenario.spec.faults["LAR_MULT"]
     prev = interp_track(px_kf, -120)
     lars, funds, rates = [], [], []
-    drops: list[tuple[int, float]] = []
     t = -120
     while t <= upto:
         px = interp_track(px_kf, t)
         lm = interp_track(lar_kf, t)
-        oc = book.step(t, px, px - prev, lar_mult=lm, paused=paused)
+        book.step(t, px, px - prev, lar_mult=lm, paused=paused)
         prev = px
-        drop_now = max(0.0, -px)
-        drops.append((t, drop_now))
-        start = drops[0][1]
-        for ht, v in drops:
-            if ht <= t - 60:
-                start = v
-            else:
-                break
-        peak = max([v for ht, v in drops if t - 60 < ht <= t] + [start])
         l_obs = book.liq_rate(t)
-        l_exp = book.expected_per_min(peak, start)
-        from incident.book import lar_ratio
-
+        l_exp = book.expected_liq_rate(t)
         lar = lar_ratio(l_obs, l_exp)
         lars.append(lar)
         funds.append(book.fund_pct)
@@ -109,3 +97,23 @@ def test_pause_queues_and_flushes():
         prev = px
         t += 2
     assert flushed > 0, "unpause must flush the backlog"
+
+
+def test_capacity_is_bounded_without_banking_idle_credit():
+    scenario = _scenario(px_drop=-0.10, capacity=120)
+    book = CrashBook(scenario)
+    from incident.scenario_loader import interp_track
+
+    track = scenario.spec.tracks["PX"]
+    previous = interp_track(track, -120)
+    outcomes = []
+    rates = []
+    for t in range(-120, 301, 2):
+        px = interp_track(track, t)
+        outcomes.append(book.step(t, px, px - previous))
+        rates.append(book.liq_rate(t))
+        previous = px
+    assert max(item.n_new_raw for item in outcomes) <= 4  # 120/min × 2 s
+    assert max(rates) <= 120
+    assert any(item.queued > 0 for item in outcomes)
+    assert book.expected_liq_rate(300) == book.liq_rate(300)
