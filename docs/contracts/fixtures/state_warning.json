@@ -1504,5 +1504,104 @@
     }
   ],
   "forecast": null,
-  "reminders": []
+  "reminders": [],
+  "command": {
+    "risk_level": "ACTION",
+    "cascade_score": 32.0,
+    "incident_mode": false,
+    "reasons": [
+      "Liquidation rate is 29.0x above baseline",
+      "420 positions are near modelled liquidation thresholds",
+      "Market liquidity has fallen 80% (modelled)"
+    ],
+    "first_priority": "Monitor the modelled incident signals.",
+    "why_first": "No abnormal liquidation cluster is currently flagged.",
+    "next_step": "Continue monitoring the P2 queue.",
+    "liquidation_rate": 145.0,
+    "liquidation_baseline": 5.0,
+    "near_liquidation": 420,
+    "liquidity_change": -80.0,
+    "abnormal_liquidations": 0,
+    "lar": 1.1,
+    "exposure_pct": 24.0,
+    "px_chg": -6.2,
+    "ticket_rate": 1.4,
+    "largest_cluster": null,
+    "cluster": null,
+    "queue": [
+      {
+        "id": "p2.stress",
+        "band": "NEXT",
+        "owner": "P2",
+        "role": "TL",
+        "text": "Run -15% stress scenario",
+        "reason": "Modelled analysis only; human approval remains required for controls.",
+        "status": "proposed",
+        "eta": null,
+        "button": "RUN",
+        "ref": "stress",
+        "priority": 4
+      }
+    ],
+    "team": [
+      {
+        "id": "P1",
+        "role": "IC",
+        "title": "Incident Commander",
+        "status": "Available",
+        "responsibility": "Escalation / overall incident"
+      },
+      {
+        "id": "P2",
+        "role": "TL",
+        "title": "Risk & Trading",
+        "status": "Active",
+        "responsibility": "Liquidations / exposure / anomalies"
+      },
+      {
+        "id": "P3",
+        "role": "CS",
+        "title": "Customer Operations",
+        "status": "Available",
+        "responsibility": "Support / customer communication"
+      }
+    ],
+    "delta": null,
+    "why_alerts": [
+      {
+        "signal": "PX_CHG_5M",
+        "value": -6.2,
+        "baseline": 0.0,
+        "watch": -2.0,
+        "warn": -5.0,
+        "critical": -10.0,
+        "unit": "%",
+        "change_pct": -620.0,
+        "conclusion": "This signal is outside its modelled baseline band."
+      },
+      {
+        "signal": "LIQ_RATE",
+        "value": 145.0,
+        "baseline": 5.0,
+        "watch": 30.0,
+        "warn": 100.0,
+        "critical": 300.0,
+        "unit": "/min",
+        "change_pct": 2800.0,
+        "conclusion": "This signal is outside its modelled baseline band."
+      },
+      {
+        "signal": "BAD_DEBT_RATE",
+        "value": 0.05,
+        "baseline": 0.0,
+        "watch": 0.01,
+        "warn": 0.01,
+        "critical": 2.0,
+        "unit": "%fund/min",
+        "change_pct": 5.0,
+        "conclusion": "This signal is outside its modelled baseline band."
+      }
+    ],
+    "label": "Simulated research prototype \u2014 modelled figures only."
+  }
 }

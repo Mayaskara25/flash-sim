@@ -3,12 +3,16 @@ import type {
   AlertAckBody,
   CatalogueDTO,
   ClockBody,
+  CopilotBody,
+  CopilotReply,
+  ExecutionDecisionBody,
   IncidentStateDTO,
   IncidentSummary,
   InjectBody,
   LiquidationReviewBody,
   NotesBody,
   PendingConfirmBody,
+  QueueRecordBody,
   ScenarioSummary,
   SeverityBody,
   StartBody,
@@ -62,6 +66,12 @@ export const incidentApi = {
     j<IncidentStateDTO>('/pending/confirm', { method: 'POST', body: JSON.stringify(body) }),
   reviewLiquidation: (body: LiquidationReviewBody) =>
     j<IncidentStateDTO>('/liquidations/review', { method: 'POST', body: JSON.stringify(body) }),
+  decideExecution: (id: string, body: ExecutionDecisionBody) =>
+    j<IncidentStateDTO>(`/liquidations/${encodeURIComponent(id)}/decision`, { method: 'POST', body: JSON.stringify(body) }),
+  recordQueueEvent: (id: string, body: QueueRecordBody) =>
+    j<IncidentStateDTO>(`/queue/${encodeURIComponent(id)}/record`, { method: 'POST', body: JSON.stringify(body) }),
+  copilot: (body: CopilotBody) => j<CopilotReply>('/copilot', { method: 'POST', body: JSON.stringify(body) }),
+  reportUrl: () => `${BASE}/report.pdf`,
   inject: (body: InjectBody) => j<IncidentStateDTO>('/inject', { method: 'POST', body: JSON.stringify(body) }),
   summary: () => j<IncidentSummary>('/summary'),
 }

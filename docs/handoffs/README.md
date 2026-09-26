@@ -15,8 +15,14 @@ Each file here is a self-contained work package. Give the file (plus `docs/PLAN.
 | [H8](H8-scenario-pack.md) | Scenarios C2–C6 + injects | H5 | `h8-scenarios` | A/B |
 | [H9](H9-frontend-forecast-polish.md) | Forecast UI, summary, polish | H6 | `h9-frontend-polish` | B |
 | [H10](H10-demo-hardening.md) | Demo hardening | all | `h10-demo` | A+B |
+| [H11](H11-merge-p2-updates.md) | Merge P2 updates (voice copilot, investigator, PDF) | H10 | `h11-p2-updates` | A |
+| [H12](H12-layout-shell.md) | UI: layout shell, details drawer, banner | H11 | `h12-layout` | A |
+| [H13](H13-design-tokens.md) | UI: design tokens, type scale, primitives | H11 | `h13-tokens` | B |
+| [H14](H14-panel-consolidation.md) | UI: panel consolidation + naming | H12 H13 | `h14-panels` | B |
+| [H15](H15-voice-report-ux.md) | UI: voice dock + incident-closed report | H12 | `h15-voice-report` | A |
+| [H16](H16-ui-acceptance.md) | UI acceptance + rehearsal | H12–H15 | `h16-ui-acceptance` | A+B |
 
-Order and parallelism: see PLAN §5.2–5.3.
+Order and parallelism: see PLAN §5.2–5.3 (H0–H10) and `docs/UI_PLAN.md` §4 (H11–H16).
 
 ## Standard rules for every handoff
 

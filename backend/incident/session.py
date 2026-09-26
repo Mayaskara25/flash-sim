@@ -59,8 +59,18 @@ class IncidentSession:
         self.what_ifs = {}
         self.last_customer_comm_t = None
         self.peaks: dict[str, tuple[float, int]] = {}
+        self.peak_cascade_score = 0.0
         self.expired_controls: list[str] = []
         self.injects: list[tuple[str, int]] = []
+        # P2 command state is derived afresh from the simulation.  These two
+        # small registries only preserve human investigation decisions and
+        # the operator's last explicit briefing point for an auditable delta.
+        self.execution_verdicts: dict[str, str] = {}
+        self.execution_records: dict[str, dict] = {}
+        self.operator_snapshot: dict | None = None
+        # Rolling P2 fact snapshots make briefings and the final report
+        # explain what actually changed during this simulation run.
+        self.p2_snapshots: list[dict] = []
 
     def start(self, scenario_id: str, speed: float = 8) -> IncidentStateDTO:
         try:
@@ -146,6 +156,7 @@ class IncidentSession:
         self.history.add(frame)
         self.verdict = classify(frame, self.history)
         self.severity = score(frame, self.history, self.verdict.verdict)
+        self.peak_cascade_score = max(self.peak_cascade_score, float(self.severity.score))
         _, transitions = self.machine.step(t, self.severity, frame)
         self.tags = self.tag_tracker.update(t, frame, self.verdict.verdict, self._sev())
         for event in transitions:
@@ -162,6 +173,11 @@ class IncidentSession:
                 self.peaks[sig.code] = (value, t)
         self._refresh_proposals()
         self._refresh_templates(bool(transitions))
+        if t >= 0 and (not self.p2_snapshots or t - self.p2_snapshots[-1]["t"] >= 30):
+            from .command import snapshot_facts
+            self.p2_snapshots.append(snapshot_facts(self))
+            # A 60 minute scenario at 2 s ticks only needs a compact ledger.
+            self.p2_snapshots = self.p2_snapshots[-180:]
         if self.forecaster is not None and t >= 0 and t % 10 == 0:
             self.forecast, self.what_ifs = self.forecaster(self)
 
@@ -246,6 +262,7 @@ class IncidentSession:
             reminders.append("Review expired controls: " + ", ".join(self.expired_controls))
         if self.last_customer_comm_t is not None and self._sev() <= 2 and self.frame.t - self.last_customer_comm_t > 900:
             reminders.append("Customer update overdue")
+        from .command import build_command
         return IncidentStateDTO(
             sim=SimBlock(scenario_id=self.scenario.spec.id, scenario_name=self.scenario.spec.name,
                 t=self.frame.t, t_label=time_label(self.frame.t), speed=self.clock.speed,
@@ -262,7 +279,8 @@ class IncidentSession:
                     for c in self.alert_manager.cards.values() if not c.superseded],
             actions=sorted(self.actions.values(), key=lambda a: (a.status != "proposed", a.priority, a.proposed_t)),
             templates=list(self.templates.values()), controls_active=list(self.controls.values()),
-            log=self.journal.entries, forecast=self.forecast, reminders=reminders)
+            log=self.journal.entries, forecast=self.forecast, reminders=reminders,
+            command=build_command(self))
 
     def decide(self, action_id: str, decision: str, actor: str, rationale: str | None) -> None:
         action = self.actions.get(action_id)
@@ -347,6 +365,54 @@ class IncidentSession:
             raise SessionError("Review rationale is required", 422)
         self._log("decision", f"Liquidations: {verdict}", actor,
                   rationale=rationale, review=verdict)
+
+    def decide_execution(self, execution_id: str, decision: str, actor: str,
+                         rationale: str | None = None) -> None:
+        """Record a P2 review of one modelled execution without alleging cause."""
+        if not self.started:
+            raise SessionError("Start a scenario first")
+        if actor != "TL":
+            raise SessionError("Modelled execution review belongs to P2 (TL)")
+        from .command import build_command
+        command = build_command(self)
+        executions = command.cluster.executions if command.cluster else []
+        execution = next((row for row in executions if row.id == execution_id), None)
+        if execution is None:
+            raise SessionError("Unknown modelled execution")
+        if execution.status in {"valid", "escalated"}:
+            raise SessionError("Execution already has a final review status")
+        self.execution_verdicts[execution_id] = decision
+        text = {
+            "valid": "P2 marked modelled execution valid after review",
+            "investigate": "P2 kept modelled execution under investigation",
+            "escalated": "P2 escalated modelled execution for further review",
+        }[decision]
+        default_reason = (
+            "Recorded against modelled threshold deviation and execution timing; "
+            "this does not establish an exchange or system error."
+        )
+        self._log("decision", f"{text}: {execution_id}", actor,
+                  rationale=(rationale or default_reason), ref=execution_id)
+
+    def record_p2_queue_event(self, item_id: str, event: str, actor: str,
+                              rationale: str | None = None) -> None:
+        """Audit a non-control P2 queue interaction (open/review/run)."""
+        if not self.started:
+            raise SessionError("Start a scenario first")
+        if actor != "TL":
+            raise SessionError("P2 queue actions belong to TL")
+        from .command import build_command
+        command = build_command(self)
+        item = next((row for row in command.queue if row.id == item_id), None)
+        if item is None:
+            raise SessionError("Unknown P2 queue action")
+        verb = {"opened": "opened", "run": "ran", "reviewed": "reviewed"}[event]
+        if item_id == "p2.stress" and event == "run":
+            action = "P2 ran modelled −15% stress analysis (no financial control executed)"
+        else:
+            action = f"P2 {verb}: {item.text}"
+        self._log("decision", action, actor,
+                  rationale=(rationale or item.reason), ref=item_id)
 
     def summary(self):
         return build_summary(self)

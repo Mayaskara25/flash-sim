@@ -1069,5 +1069,54 @@
   "controls_active": [],
   "log": [],
   "forecast": null,
-  "reminders": []
+  "reminders": [],
+  "command": {
+    "risk_level": "NORMAL",
+    "cascade_score": 0.0,
+    "incident_mode": false,
+    "reasons": [
+      "No independent risk signal is currently elevated"
+    ],
+    "first_priority": "Monitor the modelled incident signals.",
+    "why_first": "No abnormal liquidation cluster is currently flagged.",
+    "next_step": "Continue monitoring the P2 queue.",
+    "liquidation_rate": 5.0,
+    "liquidation_baseline": 5.0,
+    "near_liquidation": 0,
+    "liquidity_change": 0.0,
+    "abnormal_liquidations": 0,
+    "lar": 1.0,
+    "exposure_pct": 20.0,
+    "px_chg": 0.0,
+    "ticket_rate": 1.0,
+    "largest_cluster": null,
+    "cluster": null,
+    "queue": [],
+    "team": [
+      {
+        "id": "P1",
+        "role": "IC",
+        "title": "Incident Commander",
+        "status": "Available",
+        "responsibility": "Escalation / overall incident"
+      },
+      {
+        "id": "P2",
+        "role": "TL",
+        "title": "Risk & Trading",
+        "status": "Available",
+        "responsibility": "Liquidations / exposure / anomalies"
+      },
+      {
+        "id": "P3",
+        "role": "CS",
+        "title": "Customer Operations",
+        "status": "Available",
+        "responsibility": "Support / customer communication"
+      }
+    ],
+    "delta": null,
+    "why_alerts": [],
+    "label": "Simulated research prototype \u2014 modelled figures only."
+  }
 }

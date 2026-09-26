@@ -3,6 +3,8 @@ import { simLabel } from '../format'
 import type { ActionView } from '../types'
 import { WhatIfBadge } from './WhatIfBadge'
 
+const owner: Record<ActionView['role'], string> = { IC: 'P1', TL: 'P2', CS: 'P3', system: 'SYS' }
+
 export function ActionCard({ action, busy, onDecide, shortcutTarget }: { action: ActionView; busy: boolean; onDecide: (decision: 'approve' | 'skip', rationale: string) => Promise<void>; shortcutTarget: boolean }) {
   const [decision, setDecision] = useState<'approve' | 'skip' | null>(null)
   const [rationale, setRationale] = useState(action.rationale_hint)
@@ -19,7 +21,7 @@ export function ActionCard({ action, busy, onDecide, shortcutTarget }: { action:
     try { await onDecide(decision, rationale.trim()); setDecision(null) } catch { /* Hook exposes the error; keep the draft. */ } finally { setSubmitting(false) }
   }
   return <article className={`border border-line bg-white p-3 ${submitting ? 'opacity-55' : ''}`}>
-    <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide"><span className="bg-slate-900 px-1.5 py-0.5 text-white">{action.role}</span>{action.tag && <span className="border border-line px-1.5 py-0.5 text-muted">{action.tag}</span>}<span className="text-muted">Priority {action.priority}</span>{action.expires_t != null && <span className="text-warn">Review by {simLabel(action.expires_t)}</span>}</div>
+    <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide"><span className="bg-slate-900 px-1.5 py-0.5 text-white">{owner[action.role]}</span><span className="text-muted">{action.role}</span>{action.tag && <span className="border border-line px-1.5 py-0.5 text-muted">{action.tag}</span>}<span className="text-muted">Priority {action.priority}</span>{action.expires_t != null && <span className="text-warn">Review by {simLabel(action.expires_t)}</span>}</div>
     <p className="mt-2 text-[15px] font-medium leading-snug text-ink">{action.text}</p>
     <p className="mt-1 text-[11px] leading-snug text-muted">{action.rationale_hint}</p>
     <WhatIfBadge value={action.what_if} />
