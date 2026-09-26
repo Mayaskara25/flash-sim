@@ -7,3 +7,6 @@ frontend/dist/
 .env
 *.egg-info/
 .DS_Store
+
+# generated reports
+output/
