@@ -33,7 +33,7 @@ export function IncidentClosed({ state, summary, reportUrl, onViewTimeline, onBa
   }
 
   return <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/60 p-4" role="dialog" aria-modal="true" aria-label="Incident closed">
-    <div className="w-full max-w-2xl border border-navy bg-white p-5 shadow-2xl md:p-6">
+    <div className="w-full max-w-2xl border border-navy bg-card p-5 shadow-2xl md:p-6">
       <p className="text-xs font-semibold uppercase tracking-widest text-muted">MochaTrade / Operations</p>
       <h2 className="mt-1 text-xl font-bold">Incident closed</h2>
       <p className="mt-1 text-sm text-muted">{state.sim.scenario_name ?? 'Simulation'} · resolved at {simLabel(duration)}</p>
@@ -71,5 +71,5 @@ export function IncidentClosed({ state, summary, reportUrl, onViewTimeline, onBa
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
-  return <div className="border border-line bg-slate-50 p-2"><p className="text-xs uppercase tracking-wide text-muted">{label}</p><p className="mt-1 font-semibold">{value}</p></div>
+  return <div className="border border-line bg-bg p-2"><p className="text-xs uppercase tracking-wide text-muted">{label}</p><p className="mt-1 font-semibold">{value}</p></div>
 }

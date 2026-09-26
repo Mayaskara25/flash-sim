@@ -100,7 +100,7 @@ export function CopilotDock({ state, onAsk }: {
       🎙 Ask copilot
     </button>
     {open && <aside role="dialog" aria-modal="false" aria-label="AI incident copilot"
-      className="fixed bottom-28 right-3 z-40 flex max-h-[70vh] w-[400px] max-w-[92vw] flex-col overflow-y-auto border border-line bg-white p-3 shadow-2xl md:p-4">
+      className="fixed bottom-28 right-3 z-40 flex max-h-[70vh] w-[400px] max-w-[92vw] flex-col overflow-y-auto border border-line bg-card p-3 shadow-2xl md:p-4">
       <div className="flex items-start justify-between gap-2">
         <div>
           <h2 className="text-xs font-bold uppercase tracking-[0.13em]">AI incident copilot</h2>
@@ -126,7 +126,7 @@ export function CopilotDock({ state, onAsk }: {
         <button type="submit" disabled={busy || !question.trim()} className="border border-line px-3 py-1.5 text-xs font-semibold disabled:opacity-50">{busy ? 'Thinking…' : 'Ask'}</button>
       </form>
       {error && <p className="mt-2 text-xs text-red-800">{error}</p>}
-      {reply && <div className="mt-3 border-l-2 border-navy bg-slate-50 p-3">
+      {reply && <div className="mt-3 border-l-2 border-navy bg-bg p-3">
         <div className="flex items-center justify-between gap-2">
           <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted">Briefing</p>
           <button type="button" onClick={() => speak(reply.spoken)} className="text-xs font-semibold text-navy underline">Play response</button>
