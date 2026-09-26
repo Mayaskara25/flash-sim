@@ -29,16 +29,21 @@
  */
 @import "tailwindcss";
 
+/* Neutral utilities (bg-bg, bg-card, text-ink, text-muted, border-line) follow the
+ * light/dark variables below. `inline` makes each utility read the variable at use
+ * time, so dark mode switches them too (they were fixed light colours before). */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-card: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+}
+
 @theme {
   --font-sans: "IBM Plex Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
-  /* Legacy surfaces kept for existing panels (H14 restyles them). */
-  --color-bg: #f7f8fa;
-  --color-card: #ffffff;
-  --color-ink: #1f2937;
-  --color-muted: #5b6472;
-  --color-line: #e5e7eb;
   --color-nav: #111827;
   --color-navy: #334e68;
   --color-safe: #3f7d58;

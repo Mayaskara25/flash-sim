@@ -45,7 +45,7 @@ export function SeverityBanner({ state, scenarios, actions, busy, mock, stale, b
         {mock && <span className="text-xs border border-white/35 px-1.5 py-0.5">SAMPLE</span>}
         {stale && <span className="text-xs border px-1.5 py-0.5" style={{ borderColor: '#fbbf24', background: '#fbbf24', color: '#1f2937' }}>STALE</span>}
         <AssumptionsPanel />
-        <button type="button" onClick={onHelp} aria-label="Keyboard shortcuts" className="text-xs font-bold border border-white/35 px-1.5 py-0.5 hover:bg-white/10">?</button>
+        <button type="button" onClick={onHelp} aria-label="Keyboard shortcuts" className="text-xs font-bold border border-white/35 px-1.5 py-0.5 hover:bg-card/10">?</button>
         <SimClockControls state={state} scenarios={scenarios} actions={actions} busy={busy} />
       </span>
     </div>
@@ -53,7 +53,7 @@ export function SeverityBanner({ state, scenarios, actions, busy, mock, stale, b
     {severity.overrides.length > 0 && <p className="truncate text-xs" style={{ color: 'rgba(255,255,255,0.75)' }}>Override: {severity.overrides.join(', ')}</p>}
     <div className="mt-1 flex items-center gap-2">
       <div className="min-w-0 flex-1"><ForecastStrip forecast={state.forecast} fund={fund} t={sim.t} compact /></div>
-      <button type="button" disabled={briefing} onClick={onBriefMe} className="text-body shrink-0 border border-white/40 px-2 py-1 font-semibold hover:bg-white/10 disabled:opacity-50" style={{ color: '#fff' }}>{briefing ? 'Briefing…' : '🔊 Brief me'}</button>
+      <button type="button" disabled={briefing} onClick={onBriefMe} className="text-body shrink-0 border border-white/40 px-2 py-1 font-semibold hover:bg-card/10 disabled:opacity-50" style={{ color: '#fff' }}>{briefing ? 'Briefing…' : '🔊 Brief me'}</button>
       <button type="button" onClick={() => onOpenDetails()} className="text-body shrink-0 border border-white px-2 py-1 font-semibold" style={{ background: '#fff', color: '#0f172a' }}>Details ▸</button>
     </div>
   </section>

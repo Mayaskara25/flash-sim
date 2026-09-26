@@ -15,8 +15,8 @@ export function AssumptionsPanel() {
   return <>
     <button type="button" onClick={() => setOpen(true)} className="whitespace-nowrap text-xs border border-white/35 px-1.5 py-0.5 underline">Assumptions</button>
     {open && <div className="fixed inset-0 z-50 bg-slate-950/50" onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(false) }}>
-      <aside role="dialog" aria-modal="true" aria-label="Simulation assumptions" className="ml-auto h-full w-full max-w-md overflow-y-auto bg-white p-5 text-slate-900 shadow-xl">
-        <div className="flex items-start justify-between gap-3"><div><h2 className="text-lg font-bold">Demo assumptions</h2><p className="mt-1 text-xs text-slate-600">Read these before the incident walkthrough.</p></div><button type="button" onClick={() => setOpen(false)} className="border border-slate-300 px-2 py-1 text-xs">Close</button></div>
+      <aside role="dialog" aria-modal="true" aria-label="Simulation assumptions" className="ml-auto h-full w-full max-w-md overflow-y-auto bg-card p-5 text-ink shadow-xl">
+        <div className="flex items-start justify-between gap-3"><div><h2 className="text-lg font-bold">Demo assumptions</h2><p className="mt-1 text-xs text-muted">Read these before the incident walkthrough.</p></div><button type="button" onClick={() => setOpen(false)} className="border border-slate-300 px-2 py-1 text-xs">Close</button></div>
         <ol className="mt-5 list-decimal space-y-3 pl-5 text-sm leading-relaxed">{assumptions.map((item) => <li key={item}>{item}</li>)}</ol>
         <p className="mt-5 border-l-2 border-amber-500 bg-amber-50 p-3 text-xs">Forecasts are simulated projections, not market forecasts or production risk estimates.</p>
       </aside>
