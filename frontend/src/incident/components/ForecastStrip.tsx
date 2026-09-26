@@ -6,11 +6,12 @@ const colours = ['bg-red-500', 'bg-orange-400', 'bg-amber-300', 'bg-green-400']
 const percent = (value: number) => `${Math.round(value * 100)}%`
 const eta = (value: number | null) => value == null ? 'beyond horizon' : `${Math.round(value)} min`
 
-export function ForecastStrip({ forecast, fund, t }: { forecast: Forecast | null; fund: SignalView | undefined; t: number }) {
+export function ForecastStrip({ forecast, fund, t, compact = false }: { forecast: Forecast | null; fund: SignalView | undefined; t: number; compact?: boolean }) {
   const [expanded, setExpanded] = useState(false)
   if (!forecast) return null
   const point = forecast.sev_probs.find((item) => item.h === 15) ?? forecast.sev_probs.at(-1)
   const risk = forecast.eta_sev1_min.prob_within_15
+  if (compact) return <p className="truncate text-xs font-medium leading-snug" title={`${forecast.headline} · SEV-1 within 15 min ${percent(risk)}.`} aria-label="Simulated forecast">⚠ {forecast.headline} · SEV-1 ≤15m: {percent(risk)}</p>
   const drivers = forecast.drivers.map((driver) => `${driver.signal}: ${driver.text} (${percent(driver.contribution)})`).join(' · ')
   return <div className="mt-3 border border-white/30 bg-white/10 p-2.5" aria-label="Simulated forecast">
     <button type="button" className="flex w-full flex-wrap items-center gap-x-4 gap-y-2 text-left" aria-expanded={expanded} onClick={() => setExpanded((value) => !value)} title={`${forecast.label}. ${drivers}. Cascade model probability ${percent(forecast.cascade_model_p)}.`}>
