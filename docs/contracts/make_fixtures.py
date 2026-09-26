@@ -42,15 +42,19 @@ from incident.contracts import (  # noqa: E402
     ActiveControl,
     AlertCard,
     ClassifierBlock,
+    CommandBrief,
+    CommandDelta,
     Dims,
     Driver,
     EtaEstimate,
     Forecast,
     IncidentStateDTO,
     IncidentSummary,
+    InvestigationCluster,
     InsFundPoint,
     LogEntry,
     PeakEntry,
+    ActionQueueItem,
     PendingTransition,
     SeverityBlock,
     SevProbPoint,
@@ -58,8 +62,11 @@ from incident.contracts import (  # noqa: E402
     SimBlock,
     TagView,
     TemplateView,
+    TeamMember,
     Thresholds,
     WhatIf,
+    WhyAlert,
+    ExecutionView,
 )
 
 FIXTURES_DIR = ROOT / "docs" / "contracts" / "fixtures"
@@ -617,6 +624,72 @@ def build_pending(state: str, t_now: int) -> PendingTransition | None:
     return None
 
 
+def build_command(state: str, signals: list[SignalView], actions: list[ActionView]) -> CommandBrief:
+    """Fixture-side P2 brief so mock mode exercises the full command UI."""
+    values = {signal.code: signal.value for signal in signals}
+    risk = {"idle": "NORMAL", "normal": "NORMAL", "warning": "ACTION", "critical": "CRITICAL",
+            "emergency": "CRITICAL", "stabilising": "WATCH", "resolved": "NORMAL"}[state]
+    liq = values["LIQ_RATE"]
+    baseline = SIGNAL_BY_CODE["LIQ_RATE"].baseline
+    liquidity = -round(min(80, max(0, (liq / baseline - 1) * 8)), 1)
+    near = {"idle": 0, "normal": 0, "warning": 420, "critical": 1847, "emergency": 2411,
+            "stabilising": 310, "resolved": 0}[state]
+    has_cluster = state in {"critical", "emergency", "stabilising"}
+    executions: list[ExecutionView] = []
+    if has_cluster:
+        for index in range(1, 9):
+            threshold = 137.20 + index * 0.14
+            observed = threshold * (1 + (0.0138 if index % 2 else -0.0112))
+            executions.append(ExecutionView(
+                id=f"LC-07-{index:02d}", cluster_id="LC-07", trader_id=f"TR-{48290 + index:05d}",
+                asset="NVDA", side="LONG" if index % 3 else "SHORT", leverage=18 - (index % 4),
+                modelled_threshold=round(threshold, 2), observed_execution=round(observed, 2),
+                deviation_pct=round(abs(observed - threshold) / threshold * 100, 2),
+                execution_delay_ms=840 if index < 4 else 480, market_price=round(observed, 2),
+                liquidity_condition="thinner than baseline (modelled)",
+                reasons=["modelled threshold deviation", "unusual execution timing", "similar deviations detected in other positions"],
+                status="flagged", label="Flagged for investigation — potential anomaly, not proof of an exchange error."))
+    cluster = InvestigationCluster(id="LC-07", asset="NVDA", flagged_count=len(executions), executions=executions,
+                                   why="Modelled threshold deviation plus unusual execution timing. Research prototype — flagged for investigation only.") if executions else None
+    reasons = []
+    if liq > baseline: reasons.append(f"Liquidation rate is {liq / baseline:.1f}x above baseline")
+    if near: reasons.append(f"{near:,} positions are near modelled liquidation thresholds")
+    if liquidity <= -10: reasons.append(f"Market liquidity has fallen {abs(liquidity):.0f}% (modelled)")
+    if not reasons: reasons.append("No independent risk signal is currently elevated")
+    queue: list[ActionQueueItem] = []
+    if cluster:
+        queue.append(ActionQueueItem(id="p2.investigate", band="NOW", owner="P2", role="TL",
+                     text="Investigate liquidation cluster LC-07", reason="8 executions flagged for investigation", status="open", eta="2 min", button="OPEN", ref="LC-07", priority=1))
+    if values["NET_EXPOSURE_PCT"] >= 40:
+        queue.append(ActionQueueItem(id="p2.exposure", band="NEXT", owner="P2", role="TL",
+                     text="Review high-leverage exposure", reason="Modelled exposure above the review band", status="proposed", eta=None, button="OPEN", ref="exposure", priority=3))
+    if state in {"warning", "critical", "emergency"}:
+        queue.append(ActionQueueItem(id="p2.stress", band="NEXT", owner="P2", role="TL",
+                     text="Run -15% stress scenario", reason="Modelled analysis only; human approval remains required for controls.", status="proposed", eta=None, button="RUN", ref="stress", priority=4))
+    if values["TICKET_RATE"] >= 2:
+        queue.append(ActionQueueItem(id="p3.tickets", band="MONITOR", owner="P3", role="CS",
+                     text="Customer tickets", reason=f"+{round((values['TICKET_RATE'] - 1) * 100)}% vs baseline", status="monitor", eta=None, button=None, ref="tickets", priority=9))
+    queue = queue[:5]
+    team = [
+        TeamMember(id="P1", role="IC", title="Incident Commander", status="Busy" if risk == "CRITICAL" else "Available", responsibility="Escalation / overall incident"),
+        TeamMember(id="P2", role="TL", title="Risk & Trading", status="Active" if state not in {"idle", "normal", "resolved"} else "Available", responsibility="Liquidations / exposure / anomalies"),
+        TeamMember(id="P3", role="CS", title="Customer Operations", status="Busy" if values["TICKET_RATE"] >= 3 else "Available", responsibility="Support / customer communication"),
+    ]
+    why_alerts = [WhyAlert(signal=s.code, value=s.value, baseline=SIGNAL_BY_CODE[s.code].baseline,
+                  watch=s.thresholds.watch, warn=s.thresholds.warn, critical=s.thresholds.critical, unit=s.unit,
+                  change_pct=round((s.value - SIGNAL_BY_CODE[s.code].baseline) / max(abs(SIGNAL_BY_CODE[s.code].baseline), 1) * 100, 1),
+                  conclusion="This signal is outside its modelled baseline band.") for s in signals if s.status in {"warn", "critical"}][:6]
+    first = "Investigate liquidation cluster LC-07" if cluster else "Monitor the modelled incident signals."
+    return CommandBrief(risk_level=risk, cascade_score=SCORE_BY_STATE[state], incident_mode=risk == "CRITICAL",
+        reasons=reasons[:3], first_priority=first,
+        why_first="Large concentration of vulnerable positions plus abnormal liquidation activity (flagged for investigation)." if cluster else "No abnormal liquidation cluster is currently flagged.",
+        next_step=f"Review {len(executions)} flagged executions." if cluster else "Continue monitoring the P2 queue.",
+        liquidation_rate=liq, liquidation_baseline=baseline, near_liquidation=near, liquidity_change=liquidity,
+        abnormal_liquidations=len(executions), lar=values["LAR"], exposure_pct=values["NET_EXPOSURE_PCT"],
+        px_chg=values["PX_CHG_5M"], ticket_rate=values["TICKET_RATE"], largest_cluster="LC-07" if cluster else None,
+        cluster=cluster, queue=queue, team=team, delta=None, why_alerts=why_alerts)
+
+
 # ---------------------------------------------------------------------------
 # Build one IncidentStateDTO
 # ---------------------------------------------------------------------------
@@ -636,13 +709,15 @@ def build_state(state: str, prev_values: dict[str, float]) -> IncidentStateDTO:
         dims=DIMS_BY_STATE[state], overrides=OVERRIDES_TEXT.get(state, []),
         since_t=SINCE_T[state], pending=build_pending(state, t_now),
     )
+    signals = build_signals(state, t_now, prev_values)
+    actions = build_actions(state, t_now)
     return IncidentStateDTO(
         sim=sim, severity=severity, classifier=build_classifier(state),
-        tags=build_tags(state, t_now), signals=build_signals(state, t_now, prev_values),
-        alerts=build_alerts(state), actions=build_actions(state, t_now),
+        tags=build_tags(state, t_now), signals=signals,
+        alerts=build_alerts(state), actions=actions,
         templates=build_templates(state, t_now), controls_active=build_controls_active(state, t_now),
         log=build_log(state, t_now), forecast=build_forecast(state, t_now),
-        reminders=build_reminders(state, t_now),
+        reminders=build_reminders(state, t_now), command=build_command(state, signals, actions),
     )
 
 

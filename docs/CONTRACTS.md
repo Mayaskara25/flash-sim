@@ -124,6 +124,7 @@ type IncidentStateDTO = {
   log: LogEntry[]                  // full log, oldest first (small enough for the demo)
   forecast: Forecast | null        // H7; null until implemented / before T+0
   reminders: string[]              // e.g. "Customer update overdue (last T+14:40)"
+  command: CommandBrief | null     // P2 incident command, derived server-side from this state
 }
 
 type SignalView = { code: string; label: string; unit: string; value: number; status: SignalStatus;
@@ -152,6 +153,33 @@ type LogEntry = { id: number; t: number; t_label: string; type: LogType; sev: Se
   scenario_tags: Tag[]; actor: Role; action: string; rationale: string|null;
   signal_snapshot: Record<string, number>; liquidation_review: LiqReview|null;
   approved_by: Role|null; expires_at: number|null; ref: string|null }  // ref = action/template/control id
+
+// P2's dedicated command layer.  It is calculated on the backend from the
+// live synthetic book, signal frame and journal; clients never send financial
+// figures to the copilot.
+type ExecutionView = { id: string; cluster_id: string; trader_id: string; asset: string;
+  side: 'LONG'|'SHORT'; leverage: number; modelled_threshold: number;
+  observed_execution: number; deviation_pct: number; execution_delay_ms: number;
+  market_price: number; liquidity_condition: string; reasons: string[];
+  status: 'flagged'|'valid'|'investigate'|'escalated'; label: string }
+type InvestigationCluster = { id: string; asset: string; flagged_count: number;
+  executions: ExecutionView[]; why: string }
+type ActionQueueItem = { id: string; band: 'NOW'|'NEXT'|'MONITOR'; owner: string;
+  role: Role; text: string; reason: string; status: string; eta: string|null;
+  button: 'OPEN'|'RUN'|'APPROVE'|null; ref: string|null; priority: number }
+type TeamMember = { id: string; role: Role; title: string; status: string; responsibility: string }
+type WhyAlert = { signal: string; value: number; baseline: number; watch: number|null;
+  warn: number|null; critical: number|null; unit: string; change_pct: number|null; conclusion: string }
+type CommandBrief = { risk_level: 'NORMAL'|'WATCH'|'ACTION'|'CRITICAL'; cascade_score: number;
+  incident_mode: boolean; reasons: string[]; first_priority: string; why_first: string;
+  next_step: string; liquidation_rate: number; liquidation_baseline: number;
+  near_liquidation: number; liquidity_change: number; abnormal_liquidations: number;
+  lar: number; exposure_pct: number; px_chg: number; ticket_rate: number;
+  largest_cluster: string|null; cluster: InvestigationCluster|null; queue: ActionQueueItem[];
+  team: TeamMember[]; delta: {elapsed_s:number; since_label:string; lines:string[]}|null;
+  why_alerts: WhyAlert[]; label: string }
+type CopilotReply = { answer: string; spoken: string; first_priority: string;
+  why: string[]; next_step: string; facts: Record<string, number|string|null> }
 ```
 
 ## 6. Forecast (H7)
@@ -190,8 +218,12 @@ type WhatIf = { control_id: string; p_sev1_15_before: number; p_sev1_15_after: n
 | POST | `/incident/severity` | `{sev, actor, reason}` | state (manual raise any time; lower only via pending) |
 | POST | `/incident/pending/confirm` | `{actor:'IC'}` | state |
 | POST | `/incident/liquidations/review` | `{verdict: LiqReview, actor, rationale}` | state |
+| POST | `/incident/liquidations/{execution_id}/decision` | `{decision:'valid'|'investigate'|'escalated', actor:'TL', rationale?}` | state (records a modelled-execution review) |
+| POST | `/incident/queue/{item_id}/record` | `{event:'opened'|'run'|'reviewed', actor:'TL', rationale?}` | state (audits a non-control P2 queue interaction) |
+| POST | `/incident/copilot` | `{question}` | `CopilotReply` (deterministic response from current `command`; no client financial inputs) |
 | POST | `/incident/inject` | `{event: 'stablecoin_dip'|'oracle_stale'|'api_overload'|'rumour'}` | state |
 | GET | `/incident/summary` | — | `IncidentSummary` |
+| GET | `/incident/report.pdf` | — | dependency-free, printable simulated incident report PDF |
 
 Errors: `409` for an invalid transition (e.g. deciding an already-decided action), `422` for missing rationale. Body: `{detail: string}`.
 

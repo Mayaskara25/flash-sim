@@ -5,14 +5,16 @@ from __future__ import annotations
 from threading import RLock
 
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import Response
 
 from .catalogue import SIGNALS
 from .content.controls import CONTROLS
 from .content.templates import TEMPLATES
 from .contracts import (ActionDecideBody, AlertAckBody, CatalogueDTO, ClockBody,
+                        CopilotBody, CopilotReply, ExecutionDecisionBody,
                         IncidentStateDTO, IncidentSummary, InjectBody,
                         LiquidationReviewBody, NotesBody, PendingConfirmBody,
-                        ScenarioSummary, SeverityBody, StartBody,
+                        QueueRecordBody, ScenarioSummary, SeverityBody, StartBody,
                         TemplateCatalogueEntry, TemplateDismissBody, TemplateSendBody)
 from .session import IncidentSession, SessionError
 
@@ -136,6 +138,27 @@ def review(body: LiquidationReviewBody):
     return _run(lambda: _session.review_liquidations(body.verdict, body.actor, body.rationale))
 
 
+@router.post("/liquidations/{execution_id}/decision", response_model=IncidentStateDTO)
+def decide_execution(execution_id: str, body: ExecutionDecisionBody):
+    return _run(lambda: _session.decide_execution(execution_id, body.decision, body.actor, body.rationale))
+
+
+@router.post("/queue/{item_id}/record", response_model=IncidentStateDTO)
+def record_queue_event(item_id: str, body: QueueRecordBody):
+    return _run(lambda: _session.record_p2_queue_event(item_id, body.event, body.actor, body.rationale))
+
+
+@router.post("/copilot", response_model=CopilotReply)
+def copilot(body: CopilotBody):
+    with _lock:
+        try:
+            _session.advance()
+            from .copilot import generate_reply
+            return generate_reply(_session, body.question)
+        except SessionError as exc:
+            raise HTTPException(status_code=exc.status, detail=str(exc)) from exc
+
+
 @router.post("/inject", response_model=IncidentStateDTO)
 def inject(body: InjectBody):
     def add():
@@ -151,3 +174,17 @@ def summary():
     with _lock:
         _session.advance()
         return _session.summary()
+
+
+@router.get("/report.pdf")
+def report_pdf():
+    """A printable, self-contained incident report generated from the journal."""
+    with _lock:
+        _session.advance()
+        from .report import build_pdf
+        payload = build_pdf(_session)
+        return Response(
+            content=payload,
+            media_type="application/pdf",
+            headers={"Content-Disposition": "inline; filename=flash-crash-incident-report.pdf"},
+        )

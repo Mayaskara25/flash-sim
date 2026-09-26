@@ -311,6 +311,107 @@ class Forecast(BaseModel):
     )
 
 
+class ExecutionView(BaseModel):
+    id: str
+    cluster_id: str
+    trader_id: str
+    asset: str
+    side: Literal["LONG", "SHORT"]
+    leverage: float
+    modelled_threshold: float
+    observed_execution: float
+    deviation_pct: float
+    execution_delay_ms: float
+    market_price: float
+    liquidity_condition: str
+    reasons: list[str]
+    status: Literal["flagged", "valid", "investigate", "escalated"]
+    label: str
+
+
+class InvestigationCluster(BaseModel):
+    id: str
+    asset: str
+    flagged_count: int
+    executions: list[ExecutionView]
+    why: str
+
+
+class ActionQueueItem(BaseModel):
+    id: str
+    band: Literal["NOW", "NEXT", "MONITOR"]
+    owner: str
+    role: Role
+    text: str
+    reason: str
+    status: str
+    eta: str | None
+    button: Literal["OPEN", "RUN", "APPROVE"] | None
+    ref: str | None
+    priority: int
+
+
+class TeamMember(BaseModel):
+    id: str
+    role: Role
+    title: str
+    status: str
+    responsibility: str
+
+
+class WhyAlert(BaseModel):
+    signal: str
+    value: float
+    baseline: float
+    watch: float | None
+    warn: float | None
+    critical: float | None
+    unit: str
+    change_pct: float | None
+    conclusion: str
+
+
+class CommandDelta(BaseModel):
+    elapsed_s: int
+    since_label: str
+    lines: list[str]
+
+
+class CommandBrief(BaseModel):
+    risk_level: Literal["NORMAL", "WATCH", "ACTION", "CRITICAL"]
+    cascade_score: float
+    incident_mode: bool
+    reasons: list[str]
+    first_priority: str
+    why_first: str
+    next_step: str
+    liquidation_rate: float
+    liquidation_baseline: float
+    near_liquidation: int
+    liquidity_change: float
+    abnormal_liquidations: int
+    lar: float
+    exposure_pct: float
+    px_chg: float
+    ticket_rate: float
+    largest_cluster: str | None
+    cluster: InvestigationCluster | None
+    queue: list[ActionQueueItem]
+    team: list[TeamMember]
+    delta: CommandDelta | None
+    why_alerts: list[WhyAlert]
+    label: str = "Simulated research prototype — modelled figures only."
+
+
+class CopilotReply(BaseModel):
+    answer: str
+    spoken: str
+    first_priority: str
+    why: list[str]
+    next_step: str
+    facts: dict[str, float | int | str | None]
+
+
 class IncidentStateDTO(BaseModel):
     sim: SimBlock
     severity: SeverityBlock
@@ -324,6 +425,7 @@ class IncidentStateDTO(BaseModel):
     log: list[LogEntry]
     forecast: Forecast | None
     reminders: list[str]
+    command: CommandBrief | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -403,6 +505,28 @@ class LiquidationReviewBody(BaseModel):
     verdict: LiqReview
     actor: Role
     rationale: str
+
+
+class CopilotBody(BaseModel):
+    """A question for the deterministic P2 incident copilot.
+
+    The copilot receives the live, modelled command state server-side.  It
+    does not accept client-supplied financial figures.
+    """
+
+    question: str
+
+
+class ExecutionDecisionBody(BaseModel):
+    decision: Literal["valid", "investigate", "escalated"]
+    actor: Literal["TL"]
+    rationale: str | None = None
+
+
+class QueueRecordBody(BaseModel):
+    actor: Literal["TL"]
+    event: Literal["opened", "run", "reviewed"]
+    rationale: str | None = None
 
 
 class InjectBody(BaseModel):

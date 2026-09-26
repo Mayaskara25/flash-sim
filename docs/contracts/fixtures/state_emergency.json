@@ -2403,5 +2403,351 @@
   "reminders": [
     "Customer update overdue (last T+01:35)",
     "Reduce-only still not approved \u2014 insurance fund below the SEV-1 override"
-  ]
+  ],
+  "command": {
+    "risk_level": "CRITICAL",
+    "cascade_score": 73.0,
+    "incident_mode": true,
+    "reasons": [
+      "Liquidation rate is 104.0x above baseline",
+      "2,411 positions are near modelled liquidation thresholds",
+      "Market liquidity has fallen 80% (modelled)"
+    ],
+    "first_priority": "Investigate liquidation cluster LC-07",
+    "why_first": "Large concentration of vulnerable positions plus abnormal liquidation activity (flagged for investigation).",
+    "next_step": "Review 8 flagged executions.",
+    "liquidation_rate": 520.0,
+    "liquidation_baseline": 5.0,
+    "near_liquidation": 2411,
+    "liquidity_change": -80.0,
+    "abnormal_liquidations": 8,
+    "lar": 1.2,
+    "exposure_pct": 58.0,
+    "px_chg": -11.4,
+    "ticket_rate": 5.6,
+    "largest_cluster": "LC-07",
+    "cluster": {
+      "id": "LC-07",
+      "asset": "NVDA",
+      "flagged_count": 8,
+      "executions": [
+        {
+          "id": "LC-07-01",
+          "cluster_id": "LC-07",
+          "trader_id": "TR-48291",
+          "asset": "NVDA",
+          "side": "LONG",
+          "leverage": 17.0,
+          "modelled_threshold": 137.34,
+          "observed_execution": 139.24,
+          "deviation_pct": 1.38,
+          "execution_delay_ms": 840.0,
+          "market_price": 139.24,
+          "liquidity_condition": "thinner than baseline (modelled)",
+          "reasons": [
+            "modelled threshold deviation",
+            "unusual execution timing",
+            "similar deviations detected in other positions"
+          ],
+          "status": "flagged",
+          "label": "Flagged for investigation \u2014 potential anomaly, not proof of an exchange error."
+        },
+        {
+          "id": "LC-07-02",
+          "cluster_id": "LC-07",
+          "trader_id": "TR-48292",
+          "asset": "NVDA",
+          "side": "LONG",
+          "leverage": 16.0,
+          "modelled_threshold": 137.48,
+          "observed_execution": 135.94,
+          "deviation_pct": 1.12,
+          "execution_delay_ms": 840.0,
+          "market_price": 135.94,
+          "liquidity_condition": "thinner than baseline (modelled)",
+          "reasons": [
+            "modelled threshold deviation",
+            "unusual execution timing",
+            "similar deviations detected in other positions"
+          ],
+          "status": "flagged",
+          "label": "Flagged for investigation \u2014 potential anomaly, not proof of an exchange error."
+        },
+        {
+          "id": "LC-07-03",
+          "cluster_id": "LC-07",
+          "trader_id": "TR-48293",
+          "asset": "NVDA",
+          "side": "SHORT",
+          "leverage": 15.0,
+          "modelled_threshold": 137.62,
+          "observed_execution": 139.52,
+          "deviation_pct": 1.38,
+          "execution_delay_ms": 840.0,
+          "market_price": 139.52,
+          "liquidity_condition": "thinner than baseline (modelled)",
+          "reasons": [
+            "modelled threshold deviation",
+            "unusual execution timing",
+            "similar deviations detected in other positions"
+          ],
+          "status": "flagged",
+          "label": "Flagged for investigation \u2014 potential anomaly, not proof of an exchange error."
+        },
+        {
+          "id": "LC-07-04",
+          "cluster_id": "LC-07",
+          "trader_id": "TR-48294",
+          "asset": "NVDA",
+          "side": "LONG",
+          "leverage": 18.0,
+          "modelled_threshold": 137.76,
+          "observed_execution": 136.22,
+          "deviation_pct": 1.12,
+          "execution_delay_ms": 480.0,
+          "market_price": 136.22,
+          "liquidity_condition": "thinner than baseline (modelled)",
+          "reasons": [
+            "modelled threshold deviation",
+            "unusual execution timing",
+            "similar deviations detected in other positions"
+          ],
+          "status": "flagged",
+          "label": "Flagged for investigation \u2014 potential anomaly, not proof of an exchange error."
+        },
+        {
+          "id": "LC-07-05",
+          "cluster_id": "LC-07",
+          "trader_id": "TR-48295",
+          "asset": "NVDA",
+          "side": "LONG",
+          "leverage": 17.0,
+          "modelled_threshold": 137.9,
+          "observed_execution": 139.8,
+          "deviation_pct": 1.38,
+          "execution_delay_ms": 480.0,
+          "market_price": 139.8,
+          "liquidity_condition": "thinner than baseline (modelled)",
+          "reasons": [
+            "modelled threshold deviation",
+            "unusual execution timing",
+            "similar deviations detected in other positions"
+          ],
+          "status": "flagged",
+          "label": "Flagged for investigation \u2014 potential anomaly, not proof of an exchange error."
+        },
+        {
+          "id": "LC-07-06",
+          "cluster_id": "LC-07",
+          "trader_id": "TR-48296",
+          "asset": "NVDA",
+          "side": "SHORT",
+          "leverage": 16.0,
+          "modelled_threshold": 138.04,
+          "observed_execution": 136.49,
+          "deviation_pct": 1.12,
+          "execution_delay_ms": 480.0,
+          "market_price": 136.49,
+          "liquidity_condition": "thinner than baseline (modelled)",
+          "reasons": [
+            "modelled threshold deviation",
+            "unusual execution timing",
+            "similar deviations detected in other positions"
+          ],
+          "status": "flagged",
+          "label": "Flagged for investigation \u2014 potential anomaly, not proof of an exchange error."
+        },
+        {
+          "id": "LC-07-07",
+          "cluster_id": "LC-07",
+          "trader_id": "TR-48297",
+          "asset": "NVDA",
+          "side": "LONG",
+          "leverage": 15.0,
+          "modelled_threshold": 138.18,
+          "observed_execution": 140.09,
+          "deviation_pct": 1.38,
+          "execution_delay_ms": 480.0,
+          "market_price": 140.09,
+          "liquidity_condition": "thinner than baseline (modelled)",
+          "reasons": [
+            "modelled threshold deviation",
+            "unusual execution timing",
+            "similar deviations detected in other positions"
+          ],
+          "status": "flagged",
+          "label": "Flagged for investigation \u2014 potential anomaly, not proof of an exchange error."
+        },
+        {
+          "id": "LC-07-08",
+          "cluster_id": "LC-07",
+          "trader_id": "TR-48298",
+          "asset": "NVDA",
+          "side": "LONG",
+          "leverage": 18.0,
+          "modelled_threshold": 138.32,
+          "observed_execution": 136.77,
+          "deviation_pct": 1.12,
+          "execution_delay_ms": 480.0,
+          "market_price": 136.77,
+          "liquidity_condition": "thinner than baseline (modelled)",
+          "reasons": [
+            "modelled threshold deviation",
+            "unusual execution timing",
+            "similar deviations detected in other positions"
+          ],
+          "status": "flagged",
+          "label": "Flagged for investigation \u2014 potential anomaly, not proof of an exchange error."
+        }
+      ],
+      "why": "Modelled threshold deviation plus unusual execution timing. Research prototype \u2014 flagged for investigation only."
+    },
+    "queue": [
+      {
+        "id": "p2.investigate",
+        "band": "NOW",
+        "owner": "P2",
+        "role": "TL",
+        "text": "Investigate liquidation cluster LC-07",
+        "reason": "8 executions flagged for investigation",
+        "status": "open",
+        "eta": "2 min",
+        "button": "OPEN",
+        "ref": "LC-07",
+        "priority": 1
+      },
+      {
+        "id": "p2.exposure",
+        "band": "NEXT",
+        "owner": "P2",
+        "role": "TL",
+        "text": "Review high-leverage exposure",
+        "reason": "Modelled exposure above the review band",
+        "status": "proposed",
+        "eta": null,
+        "button": "OPEN",
+        "ref": "exposure",
+        "priority": 3
+      },
+      {
+        "id": "p2.stress",
+        "band": "NEXT",
+        "owner": "P2",
+        "role": "TL",
+        "text": "Run -15% stress scenario",
+        "reason": "Modelled analysis only; human approval remains required for controls.",
+        "status": "proposed",
+        "eta": null,
+        "button": "RUN",
+        "ref": "stress",
+        "priority": 4
+      },
+      {
+        "id": "p3.tickets",
+        "band": "MONITOR",
+        "owner": "P3",
+        "role": "CS",
+        "text": "Customer tickets",
+        "reason": "+460% vs baseline",
+        "status": "monitor",
+        "eta": null,
+        "button": null,
+        "ref": "tickets",
+        "priority": 9
+      }
+    ],
+    "team": [
+      {
+        "id": "P1",
+        "role": "IC",
+        "title": "Incident Commander",
+        "status": "Busy",
+        "responsibility": "Escalation / overall incident"
+      },
+      {
+        "id": "P2",
+        "role": "TL",
+        "title": "Risk & Trading",
+        "status": "Active",
+        "responsibility": "Liquidations / exposure / anomalies"
+      },
+      {
+        "id": "P3",
+        "role": "CS",
+        "title": "Customer Operations",
+        "status": "Busy",
+        "responsibility": "Support / customer communication"
+      }
+    ],
+    "delta": null,
+    "why_alerts": [
+      {
+        "signal": "PX_CHG_5M",
+        "value": -11.4,
+        "baseline": 0.0,
+        "watch": -2.0,
+        "warn": -5.0,
+        "critical": -10.0,
+        "unit": "%",
+        "change_pct": -1140.0,
+        "conclusion": "This signal is outside its modelled baseline band."
+      },
+      {
+        "signal": "LIQ_RATE",
+        "value": 520.0,
+        "baseline": 5.0,
+        "watch": 30.0,
+        "warn": 100.0,
+        "critical": 300.0,
+        "unit": "/min",
+        "change_pct": 10300.0,
+        "conclusion": "This signal is outside its modelled baseline band."
+      },
+      {
+        "signal": "INS_FUND_PCT",
+        "value": 22.0,
+        "baseline": 100.0,
+        "watch": 90.0,
+        "warn": 60.0,
+        "critical": 25.0,
+        "unit": "%",
+        "change_pct": -78.0,
+        "conclusion": "This signal is outside its modelled baseline band."
+      },
+      {
+        "signal": "BAD_DEBT_RATE",
+        "value": 1.35,
+        "baseline": 0.0,
+        "watch": 0.01,
+        "warn": 0.01,
+        "critical": 2.0,
+        "unit": "%fund/min",
+        "change_pct": 135.0,
+        "conclusion": "This signal is outside its modelled baseline band."
+      },
+      {
+        "signal": "NEG_BAL_ACCTS",
+        "value": 4.0,
+        "baseline": 0.0,
+        "watch": null,
+        "warn": 1.0,
+        "critical": 50.0,
+        "unit": "count",
+        "change_pct": 400.0,
+        "conclusion": "This signal is outside its modelled baseline band."
+      },
+      {
+        "signal": "TICKET_RATE",
+        "value": 5.6,
+        "baseline": 1.0,
+        "watch": 2.0,
+        "warn": 3.0,
+        "critical": 8.0,
+        "unit": "\u00d7 baseline",
+        "change_pct": 460.0,
+        "conclusion": "This signal is outside its modelled baseline band."
+      }
+    ],
+    "label": "Simulated research prototype \u2014 modelled figures only."
+  }
 }

@@ -178,6 +178,9 @@ class CrashBook:
         # non-C1 scenarios) drains the whole queue every tick — identical
         # to the old immediate-execution behaviour.
         self.queue: list[int] = []
+        self.enqueue_t: dict[int, int] = {}
+        # (t, idx, modelled_threshold, observed_fill, delay_ms) — investigator only.
+        self.recent_fills: list[tuple[int, int, float, float, float]] = []
 
         self._lookup_grid = np.arange(0.0, LAR_GRID_MAX + LAR_GRID_STEP / 2, LAR_GRID_STEP)
         self._lookup_share = self._build_lookup()
@@ -282,7 +285,9 @@ class CrashBook:
         # Newly-crossed positions are sticky (never re-cross) and enter the
         # execution queue immediately, regardless of throughput or pause.
         if len(new_idx):
-            self.queue.extend(new_idx.tolist())
+            for i in new_idx.tolist():
+                self.queue.append(i)
+                self.enqueue_t[i] = t
             self.liquidated[new_idx] = True
             self.n_liquidated_raw += len(new_idx)
             self.n_short_liq += int((~self.is_long[new_idx]).sum())
@@ -309,6 +314,19 @@ class CrashBook:
         # price/threshold applies now — a backlog draining through a still
         # falling market slips further and drains the fund faster the
         # longer it waits (SCHEMA.md).
+        if n_dequeue:
+            slip = self.slippage * abs(float(px_chg))
+            fills = np.where(
+                self.is_long[dequeue_idx],
+                liq[dequeue_idx] * (1.0 - slip),
+                liq[dequeue_idx] * (1.0 + slip),
+            )
+            for i, thresh, fill in zip(dequeue_idx.tolist(), liq[dequeue_idx].tolist(), fills.tolist()):
+                wait = t - self.enqueue_t.pop(i, t)
+                delay_ms = 80.0 + wait * 40.0
+                self.recent_fills.append((t, i, float(thresh), float(fill), delay_ms))
+            if len(self.recent_fills) > 400:
+                self.recent_fills = self.recent_fills[-400:]
         per_pos = self._shortfall(dequeue_idx, liq, px_chg) if n_dequeue else np.zeros(0)
         raw_shortfall = float(per_pos.sum())
         raw_neg = int((per_pos > 0).sum())
@@ -338,6 +356,15 @@ class CrashBook:
     @property
     def n_open(self) -> int:
         return int(self.n_total - self.n_liquidated_raw)
+
+    def near_liquidation_count(self, px_chg: float, band_pct: float = 1.5) -> int:
+        """Open positions within ``band_pct`` of their modelled threshold."""
+        px = self.current_prices(px_chg)
+        liq = self._liq_thresholds()
+        with np.errstate(divide="ignore", invalid="ignore"):
+            dist = np.where(self.is_long, (px - liq) / px, (liq - px) / px) * 100.0
+        open_mask = ~self.liquidated
+        return int(np.sum(open_mask & (dist > 0) & (dist < band_pct)))
 
     def add_topup_pct(self, pct: float) -> float:
         self.fund_usd += self.start_fund * float(pct) / 100.0
@@ -410,4 +437,6 @@ class CrashBook:
         self.adl_count = 0
         self.events.clear()
         self.queue.clear()
+        self.enqueue_t.clear()
+        self.recent_fills.clear()
         self._dequeue_budget = 0.0
