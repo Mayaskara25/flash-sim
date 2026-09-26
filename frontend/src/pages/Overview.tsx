@@ -23,7 +23,7 @@ export function OverviewPage() {
           <div className="text-[10px] tracking-wide text-muted">MARKET STATUS</div>
           <div className="text-sm font-medium">{market.market_state}</div>
         </div>
-        <div className={`border px-2 py-1 text-[11px] ${market.crash_mode ? 'border-[#e8d0d0] bg-[#f8eeee] text-crit' : 'border-line text-muted'}`}>
+        <div className={`border px-2 py-1 text-[11px] ${market.crash_mode ? 'border-[#e8d0d0] bg-[var(--crit-bg)] text-[var(--crit-fg)]' : 'border-line text-muted'}`}>
           {market.crash_mode ? 'CRASH MODE' : 'NORMAL'}
         </div>
         <span className="text-[10px] text-muted">KPI values are SIMULATED</span>

@@ -39,19 +39,19 @@ export function Layout() {
             )}
           </div>
           <div className="flex items-center gap-2">
-            <a href="/" className="border border-white/25 px-3 py-1.5 text-[12px] hover:bg-white/10">Incident console</a>
+            <a href="/" className="border border-white/25 px-3 py-1.5 text-[12px] hover:bg-card/10">Incident console</a>
             <button
               type="button"
               onClick={startDemo}
               disabled={demoRunning}
-              className="border border-white/25 bg-white/5 px-3 py-1.5 text-[12px] hover:bg-white/10 disabled:opacity-40"
+              className="border border-white/25 bg-card/5 px-3 py-1.5 text-[12px] hover:bg-card/10 disabled:opacity-40"
             >
               {demoRunning ? 'Running…' : 'Start crash simulation'}
             </button>
             <button
               type="button"
               onClick={() => void reset()}
-              className="border border-white/25 px-3 py-1.5 text-[12px] hover:bg-white/10"
+              className="border border-white/25 px-3 py-1.5 text-[12px] hover:bg-card/10"
             >
               Reset simulation
             </button>
@@ -63,7 +63,7 @@ export function Layout() {
       </header>
 
       <div className="flex min-h-[calc(100vh-52px)]">
-        <aside className="hidden w-52 shrink-0 border-r border-line bg-white md:block">
+        <aside className="hidden w-52 shrink-0 border-r border-line bg-card md:block">
           <nav className="sticky top-[52px] flex flex-col py-3 text-[13px]">
             {NAV.map((item) => (
               <NavLink
@@ -73,8 +73,8 @@ export function Layout() {
                 className={({ isActive }) =>
                   `border-l-2 px-4 py-2 ${
                     isActive
-                      ? 'border-navy bg-[#f3f4f6] font-medium text-ink'
-                      : 'border-transparent text-muted hover:bg-[#fafafa]'
+                      ? 'border-navy bg-bg font-medium text-ink'
+                      : 'border-transparent text-muted hover:bg-bg'
                   }`
                 }
               >
@@ -88,7 +88,7 @@ export function Layout() {
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="flex gap-1 overflow-x-auto border-b border-line bg-white px-2 py-1 text-[12px] md:hidden">
+          <div className="flex gap-1 overflow-x-auto border-b border-line bg-card px-2 py-1 text-[12px] md:hidden">
             {NAV.map((item) => (
               <NavLink
                 key={item.to}
