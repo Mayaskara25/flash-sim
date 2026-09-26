@@ -33,7 +33,9 @@ def test_p2_command_exposes_live_cluster_and_audits_execution_decision():
 def test_copilot_uses_structured_state_and_pdf_is_a_real_pdf():
     session = _critical_session()
     reply = generate_reply(session, "What should I do first?")
-    assert reply.first_priority.startswith("Investigate liquidation cluster")
+    # H14: a market-driven phase leads with the protective control, not the
+    # flagged cluster review. The cluster stays available in the details.
+    assert "reduce-only" in reply.first_priority
     assert reply.facts["liquidation_rate"] == session.to_dto().command.liquidation_rate
 
     delta = generate_reply(session, "What changed?")
