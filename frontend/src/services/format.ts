@@ -31,9 +31,9 @@ export function statusClass(status: string): string {
 }
 
 export function statusBg(status: string): string {
-  if (status === 'LIQUIDATED' || status === 'CRITICAL' || status === 'HIGH') return 'bg-[#f8eeee] text-crit'
-  if (status === 'NEAR LIQUIDATION') return 'bg-[#f8eeee] text-crit'
-  if (status === 'AT RISK' || status === 'MEDIUM' || status === 'WARNING') return 'bg-[#f7f1e4] text-warn'
-  if (status === 'SAFE' || status === 'LOW' || status === 'INFO') return 'bg-[#eef4f0] text-safe'
-  return 'bg-[#f3f4f6] text-muted'
+  if (status === 'LIQUIDATED' || status === 'CRITICAL' || status === 'HIGH') return 'bg-[var(--crit-bg)] text-[var(--crit-fg)]'
+  if (status === 'NEAR LIQUIDATION') return 'bg-[var(--crit-bg)] text-[var(--crit-fg)]'
+  if (status === 'AT RISK' || status === 'MEDIUM' || status === 'WARNING') return 'bg-[var(--warn-bg)] text-[var(--warn-fg)]'
+  if (status === 'SAFE' || status === 'LOW' || status === 'INFO') return 'bg-[var(--ok-bg)] text-[var(--ok-fg)]'
+  return 'bg-bg text-muted'
 }

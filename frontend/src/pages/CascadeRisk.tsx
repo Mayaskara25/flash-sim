@@ -35,7 +35,7 @@ export function CascadeRiskPage() {
             {c.cascade_risk_score} / 100
           </div>
           <div className={`mt-2 inline-block px-2 py-0.5 text-[12px] ${statusBg(c.classification)}`}>{c.classification}</div>
-          <div className="mt-3 h-2 w-full bg-[#eef0f2]">
+          <div className="mt-3 h-2 w-full bg-bg">
             <div
               className={`h-2 ${tone === 'crit' ? 'bg-crit' : tone === 'warn' ? 'bg-warn' : 'bg-safe'}`}
               style={{ width: `${c.cascade_risk_score}%` }}
@@ -64,7 +64,7 @@ export function CascadeRiskPage() {
                 type="button"
                 onClick={() => setSel(s.id)}
                 className={`w-full border px-3 py-2 text-left text-[12px] ${
-                  sel === s.id ? 'border-navy bg-[#f3f4f6]' : 'border-line bg-white'
+                  sel === s.id ? 'border-navy bg-bg' : 'border-line bg-card'
                 }`}
               >
                 {s.title}
@@ -74,7 +74,7 @@ export function CascadeRiskPage() {
           ))}
         </div>
         {stage && (
-          <div className="mt-4 grid grid-cols-3 gap-3 border border-line bg-[#fafafa] p-3 text-[13px]">
+          <div className="mt-4 grid grid-cols-3 gap-3 border border-line bg-bg p-3 text-[13px]">
             <div>
               <div className="text-[10px] text-muted">Positions</div>
               <div className="tabular font-medium">{num(stage.positions)}</div>

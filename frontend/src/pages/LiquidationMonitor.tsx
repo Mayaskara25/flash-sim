@@ -64,10 +64,10 @@ export function LiquidationMonitorPage() {
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={hist}>
-              <XAxis dataKey="lev" tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={{ stroke: '#E5E7EB' }} />
-              <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={{ stroke: '#E5E7EB' }} />
+              <XAxis dataKey="lev" tick={{ fontSize: 11, fill: 'var(--chart-axis)' }} axisLine={{ stroke: 'var(--chart-grid)' }} />
+              <YAxis tick={{ fontSize: 11, fill: 'var(--chart-axis)' }} axisLine={{ stroke: 'var(--chart-grid)' }} />
               <Tooltip contentStyle={{ border: '1px solid #E5E7EB', fontSize: 12 }} />
-              <Bar dataKey="n" fill="#334E68" />
+              <Bar isAnimationActive={false} dataKey="n" fill="var(--chart-1)" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -107,7 +107,7 @@ export function LiquidationMonitorPage() {
       </Panel>
       <div className="overflow-x-auto border border-line bg-card">
         <table className="min-w-full text-left text-[12px]">
-          <thead className="border-b border-line bg-[#fafafa] text-[10px] tracking-wide text-muted">
+          <thead className="border-b border-line bg-bg text-[10px] tracking-wide text-muted">
             <tr>
               {[
                 'Trader ID',

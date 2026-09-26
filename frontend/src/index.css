@@ -76,6 +76,12 @@
   --ink: #1f2937;
   --muted: #5b6472;
   --line: #e5e7eb;
+  /* Chart strokes (analyst pages). */
+  --chart-1: #334e68;
+  --chart-2: #9ca3af;
+  --chart-crit: #b44a4a;
+  --chart-grid: #d1d5db;
+  --chart-axis: #6b7280;
 
   /* Severity ramps (light). */
   --sev1: #c81e1e;
@@ -119,6 +125,16 @@
     --ink: #f1f5f9;
     --muted: #a9b6c6;
     --line: #2b3646;
+  --chart-1: #7fb3e0;
+  --chart-2: #8b97a8;
+  --chart-crit: #f87171;
+  --chart-grid: #334155;
+  --chart-axis: #a9b6c6;
+    --chart-1: #7fb3e0;
+    --chart-2: #8b97a8;
+    --chart-crit: #f87171;
+    --chart-grid: #334155;
+    --chart-axis: #a9b6c6;
 
     --sev1: #f87171;
     --sev1-bg: #3b1515;
@@ -160,6 +176,11 @@
   --ink: #f1f5f9;
   --muted: #a9b6c6;
   --line: #2b3646;
+  --chart-1: #7fb3e0;
+  --chart-2: #8b97a8;
+  --chart-crit: #f87171;
+  --chart-grid: #334155;
+  --chart-axis: #a9b6c6;
 
   --sev1: #f87171;
   --sev1-bg: #3b1515;

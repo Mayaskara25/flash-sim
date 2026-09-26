@@ -140,15 +140,15 @@ export function MonteCarloPage() {
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={pathData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                  <XAxis dataKey="t" tick={{ fontSize: 10, fill: '#6B7280' }} axisLine={{ stroke: '#E5E7EB' }} />
-                  <YAxis domain={['auto', 'auto']} tick={{ fontSize: 10, fill: '#6B7280' }} width={48} axisLine={{ stroke: '#E5E7EB' }} />
+                  <XAxis dataKey="t" tick={{ fontSize: 10, fill: 'var(--chart-axis)' }} axisLine={{ stroke: 'var(--chart-grid)' }} />
+                  <YAxis domain={['auto', 'auto']} tick={{ fontSize: 10, fill: 'var(--chart-axis)' }} width={48} axisLine={{ stroke: 'var(--chart-grid)' }} />
                   <Tooltip contentStyle={{ border: '1px solid #E5E7EB', fontSize: 12 }} />
                   {mc.paths_sample.map((_, i) => (
-                    <Line key={i} type="monotone" dataKey={`p${i}`} stroke="#D1D5DB" strokeWidth={0.7} dot={false} legendType="none" isAnimationActive={false} />
+                    <Line key={i} type="monotone" dataKey={`p${i}`} stroke="var(--chart-grid)" strokeWidth={0.7} dot={false} legendType="none" isAnimationActive={false} />
                   ))}
-                  <Line type="monotone" dataKey="start" stroke="#9CA3AF" strokeDasharray="4 3" strokeWidth={1} dot={false} isAnimationActive={false} />
-                  <Line type="monotone" dataKey="median" stroke="#334E68" strokeWidth={2} dot={false} isAnimationActive={false} />
-                  <Line type="monotone" dataKey="severe" stroke="#B44A4A" strokeWidth={1.5} dot={false} isAnimationActive={false} />
+                  <Line type="monotone" dataKey="start" stroke="var(--chart-2)" strokeDasharray="4 3" strokeWidth={1} dot={false} isAnimationActive={false} />
+                  <Line type="monotone" dataKey="median" stroke="var(--chart-1)" strokeWidth={2} dot={false} isAnimationActive={false} />
+                  <Line type="monotone" dataKey="severe" stroke="var(--chart-crit)" strokeWidth={1.5} dot={false} isAnimationActive={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -178,10 +178,10 @@ function Hist({ title, data }: { title: string; data: { centers: number[]; count
       <div className="h-40">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={rows}>
-            <XAxis dataKey="x" tick={{ fontSize: 10, fill: '#6B7280' }} />
-            <YAxis tick={{ fontSize: 10, fill: '#6B7280' }} />
+            <XAxis dataKey="x" tick={{ fontSize: 10, fill: 'var(--chart-axis)' }} />
+            <YAxis tick={{ fontSize: 10, fill: 'var(--chart-axis)' }} />
             <Tooltip contentStyle={{ border: '1px solid #E5E7EB', fontSize: 12 }} />
-            <Bar dataKey="n" fill="#6B7280" />
+            <Bar isAnimationActive={false} dataKey="n" fill="var(--chart-axis)" />
           </BarChart>
         </ResponsiveContainer>
       </div>

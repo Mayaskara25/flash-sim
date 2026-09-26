@@ -15,7 +15,7 @@ export function DataStatus() {
     ['AI model', d.ai_model],
   ]
   return (
-    <div className="border border-line bg-[#fafafa] p-2.5 text-[10px] leading-4 text-muted">
+    <div className="border border-line bg-bg p-2.5 text-[10px] leading-4 text-muted">
       <div className="mb-1 font-medium tracking-wide text-ink">DATA STATUS</div>
       {rows.map(([k, v]) => (
         <div key={k} className="flex justify-between gap-2">

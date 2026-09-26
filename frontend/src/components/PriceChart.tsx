@@ -7,19 +7,19 @@ export function PriceChart({ candles, height = 260 }: { candles: Candle[]; heigh
     <div style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
-          <XAxis dataKey="t" tick={{ fontSize: 10, fill: '#6B7280' }} axisLine={{ stroke: '#E5E7EB' }} tickLine={false} />
+          <XAxis dataKey="t" tick={{ fontSize: 10, fill: 'var(--chart-axis)' }} axisLine={{ stroke: 'var(--chart-grid)' }} tickLine={false} />
           <YAxis
             domain={['auto', 'auto']}
-            tick={{ fontSize: 10, fill: '#6B7280' }}
-            axisLine={{ stroke: '#E5E7EB' }}
+            tick={{ fontSize: 10, fill: 'var(--chart-axis)' }}
+            axisLine={{ stroke: 'var(--chart-grid)' }}
             tickLine={false}
             width={52}
           />
           <Tooltip
-            contentStyle={{ border: '1px solid #E5E7EB', fontSize: 12, borderRadius: 2 }}
+            contentStyle={{ border: '1px solid var(--line)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 12, borderRadius: 2 }}
             formatter={(v) => [`$${Number(v).toFixed(2)}`, 'Close']}
           />
-          <Line type="monotone" dataKey="close" stroke="#334E68" strokeWidth={1.6} dot={false} />
+          <Line type="monotone" dataKey="close" stroke="var(--chart-1)" strokeWidth={1.6} dot={false} isAnimationActive={false} />
         </LineChart>
       </ResponsiveContainer>
     </div>
