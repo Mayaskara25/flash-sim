@@ -2413,9 +2413,9 @@
       "2,411 positions are near modelled liquidation thresholds",
       "Market liquidity has fallen 80% (modelled)"
     ],
-    "first_priority": "Investigate liquidation cluster LC-07",
-    "why_first": "Large concentration of vulnerable positions plus abnormal liquidation activity (flagged for investigation).",
-    "next_step": "Review 8 flagged executions.",
+    "first_priority": "Switch BTC-PERP, ETH-PERP to reduce-only (no new exposure)",
+    "why_first": "Market-driven (LAR 1.2). Insurance fund 22% and falling. Flagged fills are secondary evidence \u2014 stop new exposure first.",
+    "next_step": "Confirm liquidation engine is not over-firing (rule out P1)",
     "liquidation_rate": 520.0,
     "liquidation_baseline": 5.0,
     "near_liquidation": 2411,
@@ -2606,7 +2606,7 @@
       {
         "id": "p2.investigate",
         "band": "NOW",
-        "owner": "P2",
+        "owner": "TL",
         "role": "TL",
         "text": "Investigate liquidation cluster LC-07",
         "reason": "8 executions flagged for investigation",
@@ -2619,7 +2619,7 @@
       {
         "id": "p2.exposure",
         "band": "NEXT",
-        "owner": "P2",
+        "owner": "TL",
         "role": "TL",
         "text": "Review high-leverage exposure",
         "reason": "Modelled exposure above the review band",
@@ -2632,7 +2632,7 @@
       {
         "id": "p2.stress",
         "band": "NEXT",
-        "owner": "P2",
+        "owner": "TL",
         "role": "TL",
         "text": "Run -15% stress scenario",
         "reason": "Modelled analysis only; human approval remains required for controls.",
@@ -2645,7 +2645,7 @@
       {
         "id": "p3.tickets",
         "band": "MONITOR",
-        "owner": "P3",
+        "owner": "CS",
         "role": "CS",
         "text": "Customer tickets",
         "reason": "+460% vs baseline",
@@ -2658,23 +2658,23 @@
     ],
     "team": [
       {
-        "id": "P1",
+        "id": "IC",
         "role": "IC",
         "title": "Incident Commander",
         "status": "Busy",
         "responsibility": "Escalation / overall incident"
       },
       {
-        "id": "P2",
+        "id": "TL",
         "role": "TL",
-        "title": "Risk & Trading",
+        "title": "Tech Lead",
         "status": "Active",
         "responsibility": "Liquidations / exposure / anomalies"
       },
       {
-        "id": "P3",
+        "id": "CS",
         "role": "CS",
-        "title": "Customer Operations",
+        "title": "Comms / Support",
         "status": "Busy",
         "responsibility": "Support / customer communication"
       }

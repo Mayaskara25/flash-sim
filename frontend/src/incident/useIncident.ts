@@ -148,7 +148,7 @@ export function useIncident(): IncidentHook {
     sendTemplate: mockAdvance, dismissTemplate: mockAdvance, addNote: mockAdvance,
     setSeverity: mockAdvance, confirmPending: mockAdvance, reviewLiquidation: mockAdvance,
     decideExecution: mockAdvance, recordQueueEvent: mockAdvance,
-    copilot: async () => ({ answer: 'Sample fixture mode. Start the live simulation for a modelled P2 briefing.', spoken: 'Sample fixture mode.', first_priority: 'Start the live simulation.', why: [], next_step: 'Select Black Tuesday.', facts: {} }),
+    copilot: async () => ({ answer: 'Sample fixture mode. Start the live simulation for a modelled incident briefing.', spoken: 'Sample fixture mode.', first_priority: 'Start the live simulation.', why: [], next_step: 'Select Black Tuesday.', facts: {} }),
     reportUrl: incidentApi.reportUrl,
     clearError: () => setError(null),
   } : {

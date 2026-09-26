@@ -2293,7 +2293,7 @@
       {
         "id": "p2.investigate",
         "band": "NOW",
-        "owner": "P2",
+        "owner": "TL",
         "role": "TL",
         "text": "Investigate liquidation cluster LC-07",
         "reason": "8 executions flagged for investigation",
@@ -2306,23 +2306,23 @@
     ],
     "team": [
       {
-        "id": "P1",
+        "id": "IC",
         "role": "IC",
         "title": "Incident Commander",
         "status": "Available",
         "responsibility": "Escalation / overall incident"
       },
       {
-        "id": "P2",
+        "id": "TL",
         "role": "TL",
-        "title": "Risk & Trading",
+        "title": "Tech Lead",
         "status": "Active",
         "responsibility": "Liquidations / exposure / anomalies"
       },
       {
-        "id": "P3",
+        "id": "CS",
         "role": "CS",
-        "title": "Customer Operations",
+        "title": "Comms / Support",
         "status": "Available",
         "responsibility": "Support / customer communication"
       }

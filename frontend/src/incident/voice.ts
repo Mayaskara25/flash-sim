@@ -1,4 +1,21 @@
 /** H15: shared voice utilities for the severity banner's "Brief me" and the copilot dock. */
+import { useEffect, useState } from 'react'
+
+/** Stop any speech immediately (Stop button, Esc, closing the dock). */
+export function stopSpeaking(): void {
+  try { if ('speechSynthesis' in window) window.speechSynthesis.cancel() } catch { /* best-effort */ }
+}
+
+/** True while the browser is speaking; polled because speechSynthesis has no global change event. */
+export function useSpeaking(): boolean {
+  const [speaking, setSpeaking] = useState(false)
+  useEffect(() => {
+    if (!('speechSynthesis' in window)) return
+    const id = window.setInterval(() => setSpeaking(window.speechSynthesis.speaking), 250)
+    return () => window.clearInterval(id)
+  }, [])
+  return speaking
+}
 
 /** Speak `text`, cancelling any utterance already in flight. Best-effort: never throws. */
 export function speak(text: string): void {

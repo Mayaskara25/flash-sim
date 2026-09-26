@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { CopilotReply, IncidentStateDTO } from '../types'
-import { hasSpeechRecognition, speak, speechRecognitionConstructor, type SpeechRecognitionInstance } from '../voice'
+import { hasSpeechRecognition, speak, speechRecognitionConstructor, stopSpeaking, useSpeaking, type SpeechRecognitionInstance } from '../voice'
 
 const ANNOUNCE_KEY = 'incident-announce-escalations'
 const ANNOUNCE_THROTTLE_MS = 20_000
@@ -53,10 +53,20 @@ export function CopilotDock({ state, onAsk }: {
 
   useEffect(() => {
     if (!open) return
-    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') { event.stopPropagation(); setOpen(false) } }
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') { event.stopPropagation(); stopSpeaking(); setOpen(false) } }
     document.addEventListener('keydown', onKey, true)
     return () => document.removeEventListener('keydown', onKey, true)
   }, [open])
+
+  // Esc stops speech anywhere on the console, even with the dock closed
+  // (the banner's "Brief me" also speaks).
+  const speaking = useSpeaking()
+  useEffect(() => {
+    if (!speaking) return
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') stopSpeaking() }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [speaking])
 
   const ask = async (value: string, play = false) => {
     if (!value.trim() || busy) return
@@ -65,7 +75,7 @@ export function CopilotDock({ state, onAsk }: {
       const response = await onAsk(value.trim())
       setReply(response)
       if (play) speak(response.spoken)
-    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Unable to prepare the P2 briefing.') }
+    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Unable to prepare the briefing.') }
     finally { setBusy(false) }
   }
 
@@ -83,6 +93,8 @@ export function CopilotDock({ state, onAsk }: {
   }
 
   return <>
+    {speaking && <button type="button" onClick={stopSpeaking} aria-label="Stop voice"
+      className="fixed bottom-16 right-44 z-40 border border-red-700 bg-red-700 px-3 py-1.5 text-sm font-bold text-white shadow-lg">■ Stop voice</button>}
     <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label="Ask copilot"
       className="fixed bottom-16 right-3 z-30 bg-navy px-3 py-2 text-xs font-bold text-white shadow-lg hover:bg-navy/90">
       🎙 Ask copilot
@@ -92,7 +104,7 @@ export function CopilotDock({ state, onAsk }: {
       <div className="flex items-start justify-between gap-2">
         <div>
           <h2 className="text-xs font-bold uppercase tracking-[0.13em]">AI incident copilot</h2>
-          <p className="mt-1 text-[11px] text-muted">P2 operational assistant. Responses are generated from the current modelled incident state; it cannot execute controls.</p>
+          <p className="mt-1 text-xs text-muted">Operational assistant. Responses are generated from the current modelled incident state; it cannot execute controls.</p>
         </div>
         <button type="button" onClick={() => setOpen(false)} aria-label="Close copilot (Esc)" className="border border-line px-2 py-1 text-xs font-semibold">✕</button>
       </div>
@@ -103,24 +115,24 @@ export function CopilotDock({ state, onAsk }: {
             ? <button type="button" disabled={busy || listening} onClick={startVoice} className="border border-navy px-2.5 py-1.5 text-xs font-semibold text-navy disabled:opacity-50">🎤 {listening ? 'Listening…' : 'Ask'}</button>
             : <span title="Voice input is unavailable in this browser (e.g. Firefox). You can still type a question." className="border border-line px-2.5 py-1.5 text-xs font-semibold text-muted">🎤 Ask (unavailable)</span>}
         </div>
-        <label className="flex items-center gap-1.5 text-[11px] text-muted" title="Speak one short line when severity gets worse, at most once per 20s">
+        <label className="flex items-center gap-1.5 text-xs text-muted" title="Speak one short line when severity gets worse, at most once per 20s">
           <input type="checkbox" checked={announce} onChange={(event) => setAnnounce(event.target.checked)} />
           Announce escalations
         </label>
       </div>
       <form className="mt-3 flex gap-2" onSubmit={(event) => { event.preventDefault(); void ask(question) }}>
-        <label className="sr-only" htmlFor="p2-copilot-question">Ask P2 copilot</label>
+        <label className="sr-only" htmlFor="p2-copilot-question">Ask copilot</label>
         <input id="p2-copilot-question" value={question} onChange={(event) => setQuestion(event.target.value)} className="min-w-0 flex-1 border border-line px-2 py-1.5 text-xs" placeholder="What should I do first? What changed? Why was this flagged?" />
         <button type="submit" disabled={busy || !question.trim()} className="border border-line px-3 py-1.5 text-xs font-semibold disabled:opacity-50">{busy ? 'Thinking…' : 'Ask'}</button>
       </form>
-      {error && <p className="mt-2 text-[11px] text-red-800">{error}</p>}
+      {error && <p className="mt-2 text-xs text-red-800">{error}</p>}
       {reply && <div className="mt-3 border-l-2 border-navy bg-slate-50 p-3">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted">P2 briefing</p>
-          <button type="button" onClick={() => speak(reply.spoken)} className="text-[11px] font-semibold text-navy underline">Play response</button>
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted">Briefing</p>
+          <button type="button" onClick={() => speak(reply.spoken)} className="text-xs font-semibold text-navy underline">Play response</button>
         </div>
         <p className="mt-1 text-xs leading-relaxed">{reply.answer}</p>
-        <div className="mt-2 grid gap-2 text-[11px] md:grid-cols-3">
+        <div className="mt-2 grid gap-2 text-xs md:grid-cols-3">
           <div><strong>FIRST PRIORITY</strong><p>{reply.first_priority}</p></div>
           <div><strong>WHY</strong>{reply.why.map((why) => <p key={why}>{why}</p>)}</div>
           <div><strong>NEXT</strong><p>{reply.next_step}</p></div>

@@ -372,7 +372,7 @@ class IncidentSession:
         if not self.started:
             raise SessionError("Start a scenario first")
         if actor != "TL":
-            raise SessionError("Modelled execution review belongs to P2 (TL)")
+            raise SessionError("Modelled execution review belongs to TL")
         from .command import build_command
         command = build_command(self)
         executions = command.cluster.executions if command.cluster else []
@@ -383,9 +383,9 @@ class IncidentSession:
             raise SessionError("Execution already has a final review status")
         self.execution_verdicts[execution_id] = decision
         text = {
-            "valid": "P2 marked modelled execution valid after review",
-            "investigate": "P2 kept modelled execution under investigation",
-            "escalated": "P2 escalated modelled execution for further review",
+            "valid": "TL marked modelled execution valid after review",
+            "investigate": "TL kept modelled execution under investigation",
+            "escalated": "TL escalated modelled execution for further review",
         }[decision]
         default_reason = (
             "Recorded against modelled threshold deviation and execution timing; "
@@ -396,21 +396,21 @@ class IncidentSession:
 
     def record_p2_queue_event(self, item_id: str, event: str, actor: str,
                               rationale: str | None = None) -> None:
-        """Audit a non-control P2 queue interaction (open/review/run)."""
+        """Audit a non-control command-queue interaction (open/review/run)."""
         if not self.started:
             raise SessionError("Start a scenario first")
         if actor != "TL":
-            raise SessionError("P2 queue actions belong to TL")
+            raise SessionError("Command queue actions belong to TL")
         from .command import build_command
         command = build_command(self)
         item = next((row for row in command.queue if row.id == item_id), None)
         if item is None:
-            raise SessionError("Unknown P2 queue action")
+            raise SessionError("Unknown command queue action")
         verb = {"opened": "opened", "run": "ran", "reviewed": "reviewed"}[event]
         if item_id == "p2.stress" and event == "run":
-            action = "P2 ran modelled −15% stress analysis (no financial control executed)"
+            action = "TL ran modelled −15% stress analysis (no financial control executed)"
         else:
-            action = f"P2 {verb}: {item.text}"
+            action = f"TL {verb}: {item.text}"
         self._log("decision", action, actor,
                   rationale=(rationale or item.reason), ref=item_id)
 
