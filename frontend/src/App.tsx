@@ -10,6 +10,7 @@ import { OverviewPage } from './pages/Overview'
 import { RiskResponsePage } from './pages/RiskResponse'
 import { IncidentConsole } from './incident/IncidentConsole'
 import { IncidentSummaryPage } from './incident/IncidentSummaryPage'
+import { UiKit } from './incident/UiKit'
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route index element={<IncidentConsole />} />
+          <Route path="ui-kit" element={<UiKit />} />
           <Route path="summary" element={<IncidentSummaryPage />} />
           <Route path="analyst" element={<Layout />}>
             <Route index element={<Navigate to="overview" replace />} />
