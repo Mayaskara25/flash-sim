@@ -43,3 +43,14 @@ Apply `docs/UI_PLAN.md` §3 to each panel: merge the duplicates, rebuild panels 
 - `grep -rn "P1'\|'P2'\|'P3'" frontend/src/incident/components` finds no role labels.
 - At C1 T+14 the hero action is **reduce-only**, with its what-if visible and no scrolling.
 - Build and lint green; before/after screenshots at T+14 in the PR.
+
+## Findings from the H12+H13 review (screenshots of C1 at T+14, 1280×720): fix these here
+1. **The hero action isn't visible.** "Do now" leads with *Acknowledge* and *Declare SEV-1*, and **reduce-only is below the fold**. Apply the hero-ranking rule above, and use compact rows for items 2–3 so the column fits without scrolling.
+2. **Default role is "All",** which shows every role's cards. Default to **IC**, and make "All" show at most 1 hero plus 2 rows per role.
+3. **The misleading banner brief** at T+14 says "Investigate liquidation cluster LC-07 — Next: Review 8 flagged executions" while the classifier says MARKET (LAR 1.0). In a market-driven phase the brief must lead with the protective control (reduce-only) and the fund. Treat the flagged fills as a secondary badge only. The source is `backend/incident/command.py` (headline and next-step logic): H14 may edit its wording/priority, keeping the endpoint shape.
+4. **Timeline** shows only `SYS … alert` lines. Show transitions, decisions and comms first, plus the *first* alert per signal, and use signal labels ("Liquidation rate critical") rather than codes.
+5. **Team status** still says P1/P2/P3 (as expected; covered above).
+6. **Drawer › Signals:** the "SEV-1 ≤15m: 100%" text is yellow on white, which has too little contrast. Use the H13 severity tokens.
+7. **Banner:** the controls wrap onto a second row. Move Scenario/Speed/Reset into one compact group (or an overflow menu) so the banner stays ≤ 150px. Drop the separate "MOCHATRADE / OPERATIONS" top bar (≈55px), because the banner can carry the product name.
+8. The fixed "?" help button overlaps panel content at the bottom right. Anchor it inside the banner instead.
+9. H12 lightly touched `IncidentTimeline.tsx` and `SignalGrid.tsx` (owned here). Build on those changes rather than reverting them.
