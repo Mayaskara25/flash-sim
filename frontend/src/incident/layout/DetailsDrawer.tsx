@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import type { IncidentActions } from '../useIncident'
 import type { CommandBrief, IncidentStateDTO, IncidentSummary, Role } from '../types'
-import { AICopilot } from '../components/AICopilot'
 import { ForecastStrip } from '../components/ForecastStrip'
 import { FundRunwayChart } from '../components/FundRunwayChart'
 import { IncidentLog } from '../components/IncidentLog'
@@ -96,7 +95,6 @@ export function DetailsDrawer({ tab, onTabChange, onClose, state, command, role,
           </div> : <p className="border border-line bg-white p-4 text-xs text-muted">The full incident report is available once the incident resolves.</p>}
           <Link to={`/summary${mock ? '?mock=1' : ''}`} className="inline-block border border-navy px-3 py-1.5 text-xs font-semibold text-navy">Open full incident summary ↗</Link>
         </div>}
-        {tab === 'copilot' && <AICopilot onAsk={(question) => actions.copilot({ question })} />}
       </div>
     </aside>
   </div>

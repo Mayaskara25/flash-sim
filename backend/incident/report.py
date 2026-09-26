@@ -17,16 +17,57 @@ from .log import time_label
 PAGE_W, PAGE_H = 595, 842
 LEFT, TOP, BOTTOM = 44, 790, 46
 
+# The renderer only embeds the base-14 Helvetica font, so text is encoded as
+# ASCII. Several strings elsewhere in the incident model use Unicode
+# punctuation (arrows for transitions, the multiplication sign for ratios,
+# the rupee sign for INR amounts, curly quotes, dashes...). Encoding those
+# straight to ASCII with `errors="ignore"` used to silently drop the
+# character instead of representing it, e.g. "CRITICAL -> EMERGENCY" became
+# "CRITICAL  EMERGENCY". Transliterate first so nothing is silently lost.
+_ASCII_MAP = {
+    "→": "->", "←": "<-",
+    "≤": "<=", "≥": ">=",
+    "–": "-", "—": "-",
+    "₹": "INR",
+    "×": "x",
+    "‘": "'", "’": "'",
+    "“": '"', "”": '"',
+    "…": "...",
+    "·": "-",
+    "−": "-",
+}
+
+
+# Mirrors frontend/src/incident/components/AssumptionsPanel.tsx — keep the
+# two lists in sync if either changes.
+_ASSUMPTIONS = [
+    "MochaTrade model: INR via UPI -> USDT/USDC custodial wallet -> leveraged futures and options; mixed A-book/B-book hedging.",
+    "All thresholds, weights and baselines are simulation values, not MochaTrade production figures.",
+    "Insurance fund exists and starts at a fixed simulated amount.",
+    "Three roles: Incident Commander, Tech Lead, Comms/Support lead.",
+    "Signals are simulated; real exchange feeds, ticketing and social listening are outside this demo.",
+    "Protective controls are proposed by the tool and executed only on human approval.",
+    "Regulatory handling (R2) is escalated to founders; the tool only flags and records it.",
+    "Forecasts are simulated projections, not market forecasts or production risk estimates.",
+]
+
+
+def _ascii(value: object) -> str:
+    text = str(value)
+    for unicode_char, replacement in _ASCII_MAP.items():
+        text = text.replace(unicode_char, replacement)
+    return text.encode("ascii", "ignore").decode("ascii")
+
 
 def _pdf_text(value: object) -> str:
-    text = str(value).encode("ascii", "ignore").decode("ascii")
+    text = _ascii(value)
     return text.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
 
 
 def _wrap(value: object, width: int = 89) -> list[str]:
     # Escape only at the final PDF text operation.  Escaping here as well
     # would render literal backslashes before parentheses after wrapping.
-    raw = str(value).encode("ascii", "ignore").decode("ascii")
+    raw = _ascii(value)
     return textwrap.wrap(raw, width=width, break_long_words=False) or [""]
 
 
@@ -163,7 +204,19 @@ def build_pdf(session) -> bytes:
         page.line("No decisions have been recorded.")
 
     ensure(5)
-    page.heading("6. Communication actions")
+    page.heading("6. Liquidation reviews")
+    reviews = summary.liquidation_reviews or []
+    if reviews:
+        for entry in reviews:
+            ensure(3)
+            page.line(f"{entry.t_label} | {entry.actor} | {entry.action} | verdict: {entry.liquidation_review}")
+            if entry.rationale:
+                page.line(f"Reason: {entry.rationale}", indent=10, size=8, color="0.35 0.39 0.44 rg")
+    else:
+        page.line("No liquidation reviews have been recorded.")
+
+    ensure(5)
+    page.heading("7. Communication actions")
     if summary.comms:
         for entry in summary.comms:
             ensure(2)
@@ -172,7 +225,7 @@ def build_pdf(session) -> bytes:
         page.line("No communications have been approved or sent.")
 
     ensure(5)
-    page.heading("7. Incident timeline")
+    page.heading("8. Incident timeline")
     # The full journal retains every alert for audit.  The report timeline
     # stays readable by including state changes, human decisions and only
     # critical alerts (rather than a page of repeated warning emissions).
@@ -189,8 +242,14 @@ def build_pdf(session) -> bytes:
         page.line("No incident events have been recorded.")
 
     ensure(4)
-    page.heading("8. Final status")
+    page.heading("9. Final status")
     page.line(f"Current modelled status: {command.risk_level} ({session.machine.state if session.started else 'IDLE'})")
     page.line("Open items: " + ("; ".join(summary.open_items) if summary.open_items else "None recorded."))
     page.line("This report is an auditable simulation artifact. It does not assert real customer positions, exchange faults or guaranteed market outcomes.", size=8, color="0.38 0.12 0.12 rg")
+
+    ensure(4)
+    page.heading("10. Assumptions")
+    for assumption in _ASSUMPTIONS:
+        ensure(3)
+        page.line(f"- {assumption}")
     return _build_pdf(pages)
