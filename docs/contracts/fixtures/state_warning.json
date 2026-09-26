@@ -1516,7 +1516,7 @@
     ],
     "first_priority": "Monitor the modelled incident signals.",
     "why_first": "No abnormal liquidation cluster is currently flagged.",
-    "next_step": "Continue monitoring the P2 queue.",
+    "next_step": "Continue monitoring the action queue.",
     "liquidation_rate": 145.0,
     "liquidation_baseline": 5.0,
     "near_liquidation": 420,
@@ -1532,7 +1532,7 @@
       {
         "id": "p2.stress",
         "band": "NEXT",
-        "owner": "P2",
+        "owner": "TL",
         "role": "TL",
         "text": "Run -15% stress scenario",
         "reason": "Modelled analysis only; human approval remains required for controls.",
@@ -1545,23 +1545,23 @@
     ],
     "team": [
       {
-        "id": "P1",
+        "id": "IC",
         "role": "IC",
         "title": "Incident Commander",
         "status": "Available",
         "responsibility": "Escalation / overall incident"
       },
       {
-        "id": "P2",
+        "id": "TL",
         "role": "TL",
-        "title": "Risk & Trading",
+        "title": "Tech Lead",
         "status": "Active",
         "responsibility": "Liquidations / exposure / anomalies"
       },
       {
-        "id": "P3",
+        "id": "CS",
         "role": "CS",
-        "title": "Customer Operations",
+        "title": "Comms / Support",
         "status": "Available",
         "responsibility": "Support / customer communication"
       }

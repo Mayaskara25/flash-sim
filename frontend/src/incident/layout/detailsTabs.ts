@@ -1,4 +1,4 @@
-export const DETAILS_TABS = ['signals', 'liquidations', 'comms', 'log', 'report', 'copilot'] as const
+export const DETAILS_TABS = ['signals', 'liquidations', 'comms', 'log', 'report'] as const
 export type DetailsTab = (typeof DETAILS_TABS)[number]
 
 export const TAB_LABELS: Record<DetailsTab, string> = {
@@ -7,7 +7,6 @@ export const TAB_LABELS: Record<DetailsTab, string> = {
   comms: 'Comms',
   log: 'Log',
   report: 'Report',
-  copilot: 'Copilot',
 }
 
 export function isDetailsTab(value: unknown): value is DetailsTab {

@@ -29,6 +29,7 @@ changes, and re-run `pytest` in `backend/` to validate the fixtures.
 from __future__ import annotations
 
 import json
+import re
 import random
 import sys
 from pathlib import Path
@@ -658,32 +659,50 @@ def build_command(state: str, signals: list[SignalView], actions: list[ActionVie
     if not reasons: reasons.append("No independent risk signal is currently elevated")
     queue: list[ActionQueueItem] = []
     if cluster:
-        queue.append(ActionQueueItem(id="p2.investigate", band="NOW", owner="P2", role="TL",
+        queue.append(ActionQueueItem(id="p2.investigate", band="NOW", owner="TL", role="TL",
                      text="Investigate liquidation cluster LC-07", reason="8 executions flagged for investigation", status="open", eta="2 min", button="OPEN", ref="LC-07", priority=1))
     if values["NET_EXPOSURE_PCT"] >= 40:
-        queue.append(ActionQueueItem(id="p2.exposure", band="NEXT", owner="P2", role="TL",
+        queue.append(ActionQueueItem(id="p2.exposure", band="NEXT", owner="TL", role="TL",
                      text="Review high-leverage exposure", reason="Modelled exposure above the review band", status="proposed", eta=None, button="OPEN", ref="exposure", priority=3))
     if state in {"warning", "critical", "emergency"}:
-        queue.append(ActionQueueItem(id="p2.stress", band="NEXT", owner="P2", role="TL",
+        queue.append(ActionQueueItem(id="p2.stress", band="NEXT", owner="TL", role="TL",
                      text="Run -15% stress scenario", reason="Modelled analysis only; human approval remains required for controls.", status="proposed", eta=None, button="RUN", ref="stress", priority=4))
     if values["TICKET_RATE"] >= 2:
-        queue.append(ActionQueueItem(id="p3.tickets", band="MONITOR", owner="P3", role="CS",
+        queue.append(ActionQueueItem(id="p3.tickets", band="MONITOR", owner="CS", role="CS",
                      text="Customer tickets", reason=f"+{round((values['TICKET_RATE'] - 1) * 100)}% vs baseline", status="monitor", eta=None, button=None, ref="tickets", priority=9))
     queue = queue[:5]
     team = [
-        TeamMember(id="P1", role="IC", title="Incident Commander", status="Busy" if risk == "CRITICAL" else "Available", responsibility="Escalation / overall incident"),
-        TeamMember(id="P2", role="TL", title="Risk & Trading", status="Active" if state not in {"idle", "normal", "resolved"} else "Available", responsibility="Liquidations / exposure / anomalies"),
-        TeamMember(id="P3", role="CS", title="Customer Operations", status="Busy" if values["TICKET_RATE"] >= 3 else "Available", responsibility="Support / customer communication"),
+        TeamMember(id="IC", role="IC", title="Incident Commander", status="Busy" if risk == "CRITICAL" else "Available", responsibility="Escalation / overall incident"),
+        TeamMember(id="TL", role="TL", title="Tech Lead", status="Active" if state not in {"idle", "normal", "resolved"} else "Available", responsibility="Liquidations / exposure / anomalies"),
+        TeamMember(id="CS", role="CS", title="Comms / Support", status="Busy" if values["TICKET_RATE"] >= 3 else "Available", responsibility="Support / customer communication"),
     ]
     why_alerts = [WhyAlert(signal=s.code, value=s.value, baseline=SIGNAL_BY_CODE[s.code].baseline,
                   watch=s.thresholds.watch, warn=s.thresholds.warn, critical=s.thresholds.critical, unit=s.unit,
                   change_pct=round((s.value - SIGNAL_BY_CODE[s.code].baseline) / max(abs(SIGNAL_BY_CODE[s.code].baseline), 1) * 100, 1),
                   conclusion="This signal is outside its modelled baseline band.") for s in signals if s.status in {"warn", "critical"}][:6]
-    first = "Investigate liquidation cluster LC-07" if cluster else "Monitor the modelled incident signals."
+    # H14: a market-driven phase leads with the protective control, not the
+    # forensic cluster review. Mirrors backend/incident/command.py::_headline.
+    proposed = [a for a in actions if a.status == "proposed"]
+    protective = next((a for a in sorted(proposed, key=lambda a: a.priority) if a.control_id), None)
+    fund = values["INS_FUND_PCT"]
+    if protective is not None and (state in {"critical", "emergency"} or fund <= 95):
+        first = protective.text
+        why_first = (f"Market-driven (LAR {values['LAR']:.1f}). Insurance fund {fund:.0f}% and falling. "
+                     "Flagged fills are secondary evidence — stop new exposure first.")
+        others = [a for a in proposed if a is not protective and not re.match(r"^(acknowledge|ack |monitor|watch )", a.text.strip(), re.I)]
+        nxt = others[0].text if others else f"Review {len(executions)} flagged executions in Details > Liquidations."
+    elif cluster:
+        first = "Investigate liquidation cluster LC-07"
+        why_first = "Large concentration of vulnerable positions plus abnormal liquidation activity (flagged for investigation)."
+        nxt = f"Review {len(executions)} flagged executions."
+    else:
+        first = "Monitor the modelled incident signals."
+        why_first = "No abnormal liquidation cluster is currently flagged."
+        nxt = "Continue monitoring the action queue."
     return CommandBrief(risk_level=risk, cascade_score=SCORE_BY_STATE[state], incident_mode=risk == "CRITICAL",
         reasons=reasons[:3], first_priority=first,
-        why_first="Large concentration of vulnerable positions plus abnormal liquidation activity (flagged for investigation)." if cluster else "No abnormal liquidation cluster is currently flagged.",
-        next_step=f"Review {len(executions)} flagged executions." if cluster else "Continue monitoring the P2 queue.",
+        why_first=why_first,
+        next_step=nxt,
         liquidation_rate=liq, liquidation_baseline=baseline, near_liquidation=near, liquidity_change=liquidity,
         abnormal_liquidations=len(executions), lar=values["LAR"], exposure_pct=values["NET_EXPOSURE_PCT"],
         px_chg=values["PX_CHG_5M"], ticket_rate=values["TICKET_RATE"], largest_cluster="LC-07" if cluster else None,

@@ -1,6 +1,8 @@
-"""P2 incident command brief — derived from live session facts, never invented."""
+"""Incident command brief — derived from live session facts, never invented."""
 
 from __future__ import annotations
+
+import re
 
 from .catalogue import SIGNALS, status_of
 from .contracts import (
@@ -24,7 +26,17 @@ _RISK_FROM_STATE = {
     "RESOLVED": "NORMAL",
 }
 
-_OWNER = {"IC": "P1", "TL": "P2", "CS": "P3", "system": "SYS"}
+# H14: roles are IC / TL / CS everywhere (UI_PLAN rule 8). "P1/P2/P3" are
+# no longer used as owner labels - they collide with the P1/P2/P3 scenario
+# tags (engine bug / API overload / key compromise) shown in the same UI.
+_OWNER = {"IC": "IC", "TL": "TL", "CS": "CS", "system": "SYS"}
+
+# H14: while the classifier blames the market, the lead instruction must be
+# the protective control, not the forensic cluster review (finding 3).
+_MARKET_VERDICTS = {"MARKET", "PRICING", "COLLATERAL"}
+
+# Acknowledgement bookkeeping is never the "next" step after a control.
+_GENERIC = re.compile(r"^(acknowledge|ack |monitor|watch |review alert)", re.I)
 
 
 def _sig(signals: dict[str, float], code: str, default: float = 0.0) -> float:
@@ -163,7 +175,7 @@ def _queue(session, cluster: InvestigationCluster | None, near: int, liq_chg: fl
     if cluster and cluster.flagged_count:
         p2_open = any(a.status in {"proposed", "approved"} and "liquidat" in a.text.lower() and a.role == "TL" for a in session.actions.values())
         items.append(ActionQueueItem(
-            id="p2.investigate", band="NOW", owner="P2", role="TL",
+            id="p2.investigate", band="NOW", owner="TL", role="TL",
             text=f"Investigate liquidation cluster {cluster.id}",
             reason=f"{cluster.flagged_count} executions flagged for investigation",
             status="open" if p2_open or True else "open",
@@ -176,14 +188,14 @@ def _queue(session, cluster: InvestigationCluster | None, near: int, liq_chg: fl
     if exposure >= 50 and not any(i.id == "p2.exposure" for i in items):
         cr = max(0.0, exposure / 100.0 * 165)
         items.append(ActionQueueItem(
-            id="p2.exposure", band="NEXT", owner="P2", role="TL",
+            id="p2.exposure", band="NEXT", owner="TL", role="TL",
             text="Review high-leverage exposure",
             reason=f"Modelled ₹{cr:.0f} Cr equivalent at risk (research estimate)",
             status="proposed", eta=None, button="OPEN", ref="exposure", priority=3,
         ))
     if session.started and session.machine.state in {"WARNING", "CRITICAL", "EMERGENCY"}:
         items.append(ActionQueueItem(
-            id="p2.stress", band="NEXT", owner="P2", role="TL",
+            id="p2.stress", band="NEXT", owner="TL", role="TL",
             text="Run −15% stress scenario",
             reason="Compare modelled cascade under a further shock. Human approval required; AI cannot execute controls.",
             status="proposed", eta=None, button="RUN", ref="stress", priority=4,
@@ -191,9 +203,9 @@ def _queue(session, cluster: InvestigationCluster | None, near: int, liq_chg: fl
     tickets = _sig(session.frame.values if session.frame else {}, "TICKET_RATE", 1)
     if tickets >= 2:
         items.append(ActionQueueItem(
-            id="p3.tickets", band="MONITOR", owner="P3", role="CS",
+            id="p3.tickets", band="MONITOR", owner="CS", role="CS",
             text="Customer tickets",
-            reason=f"+{round((tickets - 1) * 100)}% vs baseline · owner P3",
+            reason=f"+{round((tickets - 1) * 100)}% vs baseline · owner CS",
             status="monitor", eta=None, button=None, ref="tickets", priority=9,
         ))
     # Map remaining playbook actions into bands without duplicating the cluster card.
@@ -202,19 +214,19 @@ def _queue(session, cluster: InvestigationCluster | None, near: int, liq_chg: fl
         if items and items[0].id == "p2.investigate" and i == 0:
             band = "NEXT"
         items.append(ActionQueueItem(
-            id=action.id, band=band, owner="P2", role="TL", text=action.text,
+            id=action.id, band=band, owner="TL", role="TL", text=action.text,
             reason=action.rationale_hint, status=action.status,
             eta=None, button="APPROVE", ref=action.id, priority=action.priority,
         ))
     for action in ic[:2]:
         items.append(ActionQueueItem(
-            id=action.id, band="NEXT" if items else "NOW", owner="P1", role="IC",
+            id=action.id, band="NEXT" if items else "NOW", owner="IC", role="IC",
             text=action.text, reason=action.rationale_hint, status=action.status,
             eta=None, button="APPROVE", ref=action.id, priority=action.priority,
         ))
     for action in cs[:1]:
         items.append(ActionQueueItem(
-            id=action.id, band="MONITOR", owner="P3", role="CS",
+            id=action.id, band="MONITOR", owner="CS", role="CS",
             text=action.text, reason=action.rationale_hint, status=action.status,
             eta=None, button="APPROVE", ref=action.id, priority=action.priority,
         ))
@@ -234,11 +246,11 @@ def _team(session) -> list[TeamMember]:
     p2 = "Active" if started and sev <= 3 else ("Available" if started else "Standby")
     p3 = "Busy" if tickets >= 3 else ("Available" if started else "Standby")
     return [
-        TeamMember(id="P1", role="IC", title="Incident Commander",
+        TeamMember(id="IC", role="IC", title="Incident Commander",
                    status=p1, responsibility="Escalation / overall incident"),
-        TeamMember(id="P2", role="TL", title="Risk & Trading",
+        TeamMember(id="TL", role="TL", title="Tech Lead",
                    status=p2, responsibility="Liquidations / exposure / anomalies"),
-        TeamMember(id="P3", role="CS", title="Customer Operations",
+        TeamMember(id="CS", role="CS", title="Comms / Support",
                    status=p3, responsibility="Support / customer communication"),
     ]
 
@@ -301,11 +313,85 @@ def delta_from(prev: dict | None, cur: dict) -> CommandDelta | None:
     return CommandDelta(elapsed_s=dt, since_label=ago, lines=lines[:6])
 
 
+def _fund_trend(session, t: int, fund: float) -> str:
+    """Human phrasing for the insurance-fund direction, e.g. "falling 4%/min"."""
+    earlier = session.history.value_at("INS_FUND_PCT", max(0, t - 60))
+    if earlier is None or earlier <= 0:
+        return "steady" if fund >= 99.5 else "falling"
+    delta = fund - earlier
+    if abs(delta) < 0.5:
+        return "steady"
+    return f"{'falling' if delta < 0 else 'rising'} {abs(delta):.0f}%/min"
+
+
+def _headline(session, facts, cluster, lar: float) -> tuple[str, str, str]:
+    """(first priority, why it is first, next step) — H14.
+
+    A market-driven phase leads with the protective control and the fund
+    (H12/H13 review finding 3). The flagged cluster stays available in
+    Details › Liquidations as secondary evidence rather than as the
+    headline, which previously read as "blame the fills" during a crash.
+    """
+    t = int(facts.get("t", 0))
+    values = session.frame.values if session.frame else {}
+    fund = _sig(values, "INS_FUND_PCT", 100.0)
+    trend = _fund_trend(session, t, fund)
+    proposed = [a for a in session.actions.values() if a.status == "proposed"]
+    proposed.sort(key=lambda a: (a.priority, a.proposed_t))
+    protective = next((a for a in proposed if a.control_id), None)
+    verdict = session.verdict.verdict if session.verdict else "NONE"
+    # At a hard override the fund is gone, so "stop new exposure" is moot and
+    # an unhelping control must not lead. Otherwise a missing or flat
+    # what-if at this tick does not disqualify the protective control.
+    useful = protective is not None and fund > 0.0
+
+    if useful and (verdict in _MARKET_VERDICTS or fund <= 95.0):
+        why = (
+            f"Market-driven (LAR {lar:.1f}). Insurance fund {fund:.0f}% and {trend}. "
+            "Flagged fills are secondary evidence — stop new exposure first."
+        )
+        # The next step must not be "acknowledge the alert": the console
+        # already shows that, and a protective control outranks it.
+        others = [a for a in proposed if a is not protective and not _GENERIC.match(a.text.strip())]
+        if others:
+            nxt = others[0].text
+        elif cluster:
+            nxt = f"Review {cluster.flagged_count} flagged executions in Details › Liquidations."
+        else:
+            nxt = "Hold the control and watch the fund and liquidation rate."
+        return protective.text, why, nxt
+
+    # Hard override: the fund is gone, so a risk-limiting control is moot and
+    # the lead instruction is escalation. Never "acknowledge the alert".
+    overrides = session.severity.overrides if session.severity else []
+    if overrides:
+        escalation = next((a for a in proposed if not _GENERIC.match(a.text.strip())), None)
+        if escalation is not None:
+            why = (
+                f"Hard override active ({'; '.join(overrides)}). Insurance fund {fund:.0f}%. "
+                "Controlling new exposure can no longer change the outcome — escalate instead."
+            )
+            others = [a for a in proposed if a is not escalation and not _GENERIC.match(a.text.strip())]
+            return escalation.text, why, (others[0].text if others else "Keep the record and brief the founders now.")
+
+    if cluster:
+        first = f"Investigate liquidation cluster {cluster.id}"
+        why_first = "Large concentration of vulnerable positions + abnormal liquidation activity (flagged for investigation)."
+        nxt = f"Review {cluster.flagged_count} flagged executions."
+        return first, why_first, nxt
+
+    p2 = next((a for a in proposed if a.role == "TL"), None)
+    first = p2.text if p2 else (proposed[0].text if proposed else "Monitor signals — no action is queued.")
+    why_first = p2.rationale_hint if p2 else "No abnormal liquidation cluster is currently flagged."
+    nxt = proposed[1].text if len(proposed) > 1 else "Continue monitoring liquidations and exposure."
+    return first, why_first, nxt
+
+
 def build_command(session) -> CommandBrief:
     if not session.started or session.frame is None:
         return CommandBrief(
             risk_level="NORMAL", cascade_score=0, incident_mode=False,
-            reasons=["Start a scenario to populate the P2 risk brief."],
+            reasons=["Start a scenario to populate the incident brief."],
             first_priority="Start Black Tuesday (C1) from the scenario selector.",
             why_first="No live incident is running.",
             next_step="Select C1 and press Start.",
@@ -328,17 +414,7 @@ def build_command(session) -> CommandBrief:
     liq_chg = facts["liquidity_change"]
     lar = facts["lar"]
     reasons = _reasons(liq_rate, baseline, near, liq_chg, lar, facts.get("tickets", 1))
-    if cluster:
-        first = f"Investigate liquidation cluster {cluster.id}"
-        why_first = "Large concentration of vulnerable positions + abnormal liquidation activity (flagged for investigation)."
-        nxt = f"Review {cluster.flagged_count} flagged executions."
-    else:
-        proposed = [a for a in session.actions.values() if a.status == "proposed"]
-        proposed.sort(key=lambda a: a.priority)
-        p2 = next((a for a in proposed if a.role == "TL"), None)
-        first = p2.text if p2 else (proposed[0].text if proposed else "Monitor signals — no P2 action is queued.")
-        why_first = p2.rationale_hint if p2 else "No abnormal liquidation cluster is currently flagged."
-        nxt = proposed[1].text if len(proposed) > 1 else "Continue monitoring liquidations and exposure."
+    first, why_first, nxt = _headline(session, facts, cluster, lar)
     queue = _queue(session, cluster, near, liq_chg)
     why_alerts = []
     for sig in SIGNALS:

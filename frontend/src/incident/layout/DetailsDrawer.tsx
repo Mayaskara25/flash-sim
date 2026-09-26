@@ -2,15 +2,23 @@ import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import type { IncidentActions } from '../useIncident'
 import type { CommandBrief, IncidentStateDTO, IncidentSummary, Role } from '../types'
-import { AICopilot } from '../components/AICopilot'
 import { ForecastStrip } from '../components/ForecastStrip'
 import { FundRunwayChart } from '../components/FundRunwayChart'
 import { IncidentLog } from '../components/IncidentLog'
 import { IncidentReport } from '../components/IncidentReport'
-import { SignalGrid } from '../components/SignalGrid'
+import { LiquidationInvestigator } from '../components/LiquidationInvestigator'
+import { SignalCard } from '../components/SignalCard'
 import { TemplatePanel } from '../components/TemplatePanel'
+import { Button } from '../ui'
 import { DETAILS_TABS, TAB_LABELS, type DetailsTab } from './detailsTabs'
 
+/**
+ * H14: the drawer is the "everything else" home.
+ *
+ * Signals · Liquidations · Comms · Log · Report · Copilot. Every panel that
+ * lost its slot in the main view lives here, at drawer scale, and nothing
+ * here repeats a fact that is already on screen.
+ */
 export function DetailsDrawer({ tab, onTabChange, onClose, state, command, role, busy, mock, summary, actions, onOpenInvestigator }: {
   tab: DetailsTab
   onTabChange: (tab: DetailsTab) => void
@@ -48,55 +56,64 @@ export function DetailsDrawer({ tab, onTabChange, onClose, state, command, role,
     return () => document.removeEventListener('keydown', onKey, true)
   }, [onClose, tab])
 
+  // Alerts are sorted worst-first so the drawer matches the main-view order.
+  const alertsRank = { critical: 0, warn: 1, watch: 2, normal: 3 } as const
+  const allSignals = [...state.signals].sort((a, b) => alertsRank[a.status] - alertsRank[b.status] || a.code.localeCompare(b.code))
+
   return <div className="fixed inset-0 z-40">
     <div className="absolute inset-0 bg-slate-950/40" onClick={onClose} />
-    <aside ref={panelRef} role="dialog" aria-modal="true" aria-label="Incident details" tabIndex={-1} className="absolute right-0 top-0 flex h-full w-[45%] min-w-[400px] flex-col bg-bg shadow-xl focus:outline-none">
-      <div className="flex shrink-0 flex-wrap items-center gap-1 border-b border-line bg-white px-3 py-2">
+    <aside ref={panelRef} role="dialog" aria-modal="true" aria-label="Incident details" tabIndex={-1}
+      className="absolute right-0 top-0 flex h-full w-[45%] min-w-[420px] flex-col shadow-xl focus:outline-none" style={{ background: 'var(--bg)' }}>
+      <div className="flex shrink-0 flex-wrap items-center gap-1 border-b px-3 py-2" style={{ borderColor: 'var(--line)', background: 'var(--surface)' }}>
         <div role="tablist" aria-label="Details sections" className="flex min-w-0 flex-1 flex-wrap gap-1">
           {DETAILS_TABS.map((id) => <button key={id} type="button" role="tab" aria-selected={tab === id}
             onClick={() => onTabChange(id)}
-            className={`border px-2.5 py-1 text-xs font-semibold ${tab === id ? 'border-navy bg-navy text-white' : 'border-line bg-white text-muted hover:bg-slate-50'}`}>
+            className="text-xs font-semibold border px-2.5 py-1"
+            style={{
+              borderColor: tab === id ? 'var(--ink)' : 'var(--line)',
+              background: tab === id ? 'var(--ink)' : 'var(--surface)',
+              color: tab === id ? 'var(--bg)' : 'var(--muted)',
+            }}>
             {TAB_LABELS[id]}
           </button>)}
         </div>
-        <button type="button" onClick={onClose} aria-label="Close details (Esc)" className="border border-line px-2.5 py-1 text-xs font-semibold">✕</button>
+        <button type="button" onClick={onClose} aria-label="Close details (Esc)" className="text-xs font-semibold border px-2.5 py-1" style={{ borderColor: 'var(--line)' }}>✕</button>
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto p-3" role="tabpanel">
-        {tab === 'signals' && <div className="space-y-3">
-          {state.forecast && fund && <div className="border border-line bg-slate-950 p-3 text-white"><FundRunwayChart fund={fund} forecast={state.forecast} t={state.sim.t} /></div>}
-          {state.forecast && <ForecastStrip forecast={state.forecast} fund={fund} t={state.sim.t} />}
-          <SignalGrid signals={state.signals} alerts={state.alerts} />
+      <div className="min-h-0 flex-1 overflow-y-auto p-3" role="tabpanel" style={{ background: 'var(--bg)' }}>
+        {tab === 'signals' && <div className="space-y-4">
+          <div>
+            <h2 className="text-label" style={{ color: 'var(--muted)' }}>All signals · {allSignals.length}</h2>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">{allSignals.map((signal) => <SignalCard key={signal.code} signal={signal} alerts={state.alerts} size="sm" />)}</div>
+          </div>
+          {state.forecast && <div>
+            <h2 className="text-label" style={{ color: 'var(--muted)' }}>Fund runway</h2>
+            <div className="mt-2 border p-3" style={{ borderColor: 'var(--line)', background: 'var(--surface)' }}>
+              <FundRunwayChart fund={fund} forecast={state.forecast} t={state.sim.t} />
+            </div>
+            <div className="mt-2"><ForecastStrip forecast={state.forecast} fund={fund} t={state.sim.t} /></div>
+          </div>}
         </div>}
         {tab === 'liquidations' && <div className="space-y-3">
-          {cluster ? <>
-            <div className="border border-line bg-white p-3">
-              <h2 className="text-sm font-bold">{cluster.id} · {cluster.asset}</h2>
-              <p className="mt-1 text-xs text-muted">{cluster.flagged_count} executions flagged for investigation. Modelled evidence only — no system or exchange error is asserted.</p>
-              <p className="mt-2 text-xs">{cluster.why}</p>
-              <button type="button" onClick={onOpenInvestigator} className="mt-3 border border-navy bg-white px-3 py-1.5 text-xs font-bold text-navy">Open investigator</button>
-            </div>
-            <div className="border border-line bg-white p-3"><h3 className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Flagged executions</h3>
-              <ul className="mt-2 divide-y divide-line">{cluster.executions.filter((row) => row.status !== 'valid').map((row) => <li key={row.id} className="py-2 text-xs"><strong>{row.id}</strong> · {row.trader_id} · {row.side} {row.leverage}× <span className="ml-1 uppercase text-muted">{row.status}</span><p className="mt-0.5 text-[11px] text-muted">{row.label}</p></li>)}</ul>
-            </div>
-          </> : <p className="border border-line bg-white p-4 text-xs text-muted">No abnormal liquidation cluster is under investigation. One appears here when P2 flags fills.</p>}
+          {cluster ? <LiquidationInvestigator cluster={cluster} busy={busy} onDecision={(id, decision) => void actions.decideExecution(id, { decision, actor: 'TL' }).catch(() => {})} />
+            : <p className="text-body p-4" style={{ border: '1px solid var(--line)', color: 'var(--muted)' }}>No abnormal liquidation cluster is under investigation. One appears here when the engine flags fills.</p>}
+          {cluster && <Button variant="secondary" onClick={onOpenInvestigator}>Record that TL opened this cluster</Button>}
         </div>}
         {tab === 'comms' && <TemplatePanel templates={state.templates} actor={messageActor} busy={busy}
           onSend={(id, actor, text) => actions.sendTemplate(id, { actor, text })}
           onDismiss={(id, actor, rationale) => actions.dismissTemplate(id, { actor, rationale })} />}
-        {tab === 'log' && <IncidentLog log={state.log} alerts={state.alerts} role={role} busy={busy}
+        {tab === 'log' && <IncidentLog log={state.log} alerts={state.alerts} signals={state.signals} role={role} busy={busy}
           onAck={(id, actor) => actions.ackAlert(id, { actor })}
           onNote={(text, actor) => actions.addNote({ actor, text })}
           onReview={(verdict, rationale) => actions.reviewLiquidation({ verdict, actor: logActor === 'system' ? 'IC' : logActor, rationale })} />}
         {tab === 'report' && <div className="space-y-3">
           {command && <IncidentReport state={state} command={command} reportUrl={actions.reportUrl()} />}
-          {summary ? <div className="border border-line bg-white p-3">
-            <h2 className="text-xs font-bold uppercase tracking-[0.13em]">Summary</h2>
-            <p className="mt-1 text-xs"><strong>{summary.scenario_id}</strong> · peak SEV-{summary.peak_sev}</p>
-            {summary.open_items.length > 0 && <ul className="mt-2 list-disc pl-5 text-xs">{summary.open_items.map((item) => <li key={item}>{item}</li>)}</ul>}
-          </div> : <p className="border border-line bg-white p-4 text-xs text-muted">The full incident report is available once the incident resolves.</p>}
-          <Link to={`/summary${mock ? '?mock=1' : ''}`} className="inline-block border border-navy px-3 py-1.5 text-xs font-semibold text-navy">Open full incident summary ↗</Link>
+          {summary ? <div className="border p-3" style={{ borderColor: 'var(--line)', background: 'var(--surface)' }}>
+            <h2 className="text-label" style={{ color: 'var(--muted)' }}>Summary</h2>
+            <p className="text-body mt-1"><strong>{summary.scenario_id}</strong> · peak SEV-{summary.peak_sev}</p>
+            {summary.open_items.length > 0 && <ul className="text-body mt-2 list-disc pl-5">{summary.open_items.map((item) => <li key={item}>{item}</li>)}</ul>}
+          </div> : <p className="text-body p-4" style={{ borderColor: 'var(--line)', color: 'var(--muted)' }}>The full incident report is available once the incident resolves.</p>}
+          <Link to={`/summary${mock ? '?mock=1' : ''}`} className="text-body inline-block border px-3 py-1.5 font-semibold" style={{ borderColor: 'var(--ink)' }}>Open full incident summary ↗</Link>
         </div>}
-        {tab === 'copilot' && <AICopilot onAsk={(question) => actions.copilot({ question })} />}
       </div>
     </aside>
   </div>

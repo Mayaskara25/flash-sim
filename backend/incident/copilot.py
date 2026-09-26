@@ -104,7 +104,7 @@ def _execution_evidence(command) -> str:
 
 def _queue_text(command) -> str:
     if not command.queue:
-        return "No P2 action is currently queued. Continue monitoring the modelled signals."
+        return "No action is currently queued. Continue monitoring the modelled signals."
     items = [f"{item.band}: {item.text} ({item.owner})" for item in command.queue[:3]]
     return "Current queue: " + "; ".join(items) + "."
 
@@ -126,7 +126,7 @@ def _stress_text(session, command) -> str:
         return (
             f"The current simulated projection says: {session.forecast.headline}. "
             f"The cascade model probability is {session.forecast.cascade_model_p:.0%}. "
-            "Run the P2 stress analysis to compare a further shock; it does not execute a financial control."
+            "Run the modelled stress analysis to compare a further shock; it does not execute a financial control."
         )
     return (
         f"A further-shock stress test is appropriate while risk is {command.risk_level}. "
@@ -141,7 +141,7 @@ def generate_reply(session, question: str) -> CopilotReply:
     intent = _intent(question)
 
     if not session.started:
-        answer = "Start a simulated scenario first. Once it is running, I will generate a P2 briefing from the live modelled state, journal and execution evidence."
+        answer = "Start a simulated scenario first. Once it is running, I will generate a briefing from the live modelled state, journal and execution evidence."
     elif intent == "change":
         delta = _window_delta(session, facts, _window_seconds(question))
         if delta:
@@ -181,12 +181,12 @@ def generate_reply(session, question: str) -> CopilotReply:
         answer = (
             f"{facts['scenario']} is at {facts['sim_time']} in {facts['incident_state']} state. "
             f"There are {facts['decisions_recorded']} recorded decisions and {facts['communications_sent']} sent communications. "
-            f"{command.first_priority} remains the P2 focus."
+            f"{command.first_priority} remains the team focus."
         )
     else:
         cluster = f" {command.abnormal_liquidations} execution(s) are flagged in {command.largest_cluster}." if command.largest_cluster else ""
         answer = (
-            f"P2 briefing at {facts['sim_time']}. Risk is {command.risk_level} at {command.cascade_score:.0f}/100. "
+            f"Incident briefing at {facts['sim_time']}. Risk is {command.risk_level} at {command.cascade_score:.0f}/100. "
             f"{'; '.join(command.reasons)}.{cluster} {command.first_priority}."
         )
 
