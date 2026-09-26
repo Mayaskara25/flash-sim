@@ -67,7 +67,7 @@ export function LiquidationMonitorPage() {
               <XAxis dataKey="lev" tick={{ fontSize: 11, fill: 'var(--chart-axis)' }} axisLine={{ stroke: 'var(--chart-grid)' }} />
               <YAxis tick={{ fontSize: 11, fill: 'var(--chart-axis)' }} axisLine={{ stroke: 'var(--chart-grid)' }} />
               <Tooltip contentStyle={{ border: '1px solid #E5E7EB', fontSize: 12 }} />
-              <Bar dataKey="n" fill="var(--chart-1)" />
+              <Bar isAnimationActive={false} dataKey="n" fill="var(--chart-1)" />
             </BarChart>
           </ResponsiveContainer>
         </div>

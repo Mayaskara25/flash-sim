@@ -181,7 +181,7 @@ function Hist({ title, data }: { title: string; data: { centers: number[]; count
             <XAxis dataKey="x" tick={{ fontSize: 10, fill: 'var(--chart-axis)' }} />
             <YAxis tick={{ fontSize: 10, fill: 'var(--chart-axis)' }} />
             <Tooltip contentStyle={{ border: '1px solid #E5E7EB', fontSize: 12 }} />
-            <Bar dataKey="n" fill="var(--chart-axis)" />
+            <Bar isAnimationActive={false} dataKey="n" fill="var(--chart-axis)" />
           </BarChart>
         </ResponsiveContainer>
       </div>

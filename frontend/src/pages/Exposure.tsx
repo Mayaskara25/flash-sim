@@ -46,7 +46,7 @@ export function ExposurePage() {
                 <XAxis dataKey="k" tick={{ fontSize: 10, fill: 'var(--chart-axis)' }} />
                 <YAxis hide />
                 <Tooltip formatter={(v) => inrFromUsd(Number(v), fx)} contentStyle={{ border: '1px solid #E5E7EB', fontSize: 12 }} />
-                <Bar dataKey="v" fill="var(--chart-1)" />
+                <Bar isAnimationActive={false} dataKey="v" fill="var(--chart-1)" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -58,7 +58,7 @@ export function ExposurePage() {
                 <XAxis dataKey="k" tick={{ fontSize: 10, fill: 'var(--chart-axis)' }} />
                 <YAxis hide />
                 <Tooltip formatter={(v) => inrFromUsd(Number(v), fx)} contentStyle={{ border: '1px solid #E5E7EB', fontSize: 12 }} />
-                <Bar dataKey="v" fill="var(--chart-axis)" />
+                <Bar isAnimationActive={false} dataKey="v" fill="var(--chart-axis)" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -67,7 +67,7 @@ export function ExposurePage() {
           <div className="h-48">
             <ResponsiveContainer>
               <PieChart>
-                <Pie data={ls} dataKey="v" nameKey="k" innerRadius={40} outerRadius={70} stroke="var(--surface)">
+                <Pie isAnimationActive={false} data={ls} dataKey="v" nameKey="k" innerRadius={40} outerRadius={70} stroke="var(--surface)">
                   <Cell fill="var(--chart-1)" />
                   <Cell fill="var(--chart-2)" />
                 </Pie>
